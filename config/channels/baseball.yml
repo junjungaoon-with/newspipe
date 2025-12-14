@@ -1,0 +1,64 @@
+source_urls:
+  - url: "https://livejupiter2.blog.jp/"
+    parser_name: 5ch
+    title_add_word: "【2ch・5ch】"
+  - url: "http://blog.livedoor.jp/nanjstu/"
+    parser_name: nanjmatome
+    title_add_word: "【なんj】"
+enabled: true
+
+genre: "野球"
+
+maintenance_sheets:
+  - "APP_記事内容"
+  - "APP_記事概要"
+  - "APP_走査済みURL"
+  - "指示書ログ"
+
+max_rows: 3000 #スプシの上限行数
+
+extra_word: "野球"
+
+#指示書関連設定
+
+closing_message: |
+  ご視聴ありがとうございました！
+  野球の最新情報を毎日いち早くお届けしています
+  チャンネル登録してもらえるとうれしいです！
+
+min_required_pictures: 3
+
+thumbnail_patterns:
+  1: "静止画、640、中央上"
+  2: "静止画、中央上、そのまま張り付け"
+  3: "静止画、1920、中央上"
+
+text2_patterns:
+  - "サムネ用、白い長方形、青文字"
+  - "サムネ用、白い長方形、赤文字"
+text2_disable_probability: 0.2   # 20%の確率で text2 を削除
+
+default_text2_setting: "題目テロップ_黄色"
+
+gif_image_setting: "GIFそのまま張り付け、読み上げなし"
+
+bgm_map:
+  neutral: "bgm_normal.mp3"
+  angry: "bgm_angry.mp3"
+  sad: "bgm_sad.mp3"
+  happy: "bgm_happy.mp3"
+
+
+#指示書分split設定
+
+split_max_len: 60
+split_range_start: 25
+split_range_end: 60
+split_kugiri:
+  - "。"
+  - "、"
+  - "」"
+
+
+
+
