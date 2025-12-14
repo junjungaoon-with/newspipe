@@ -1,17 +1,2 @@
-channels:
-  - name: channel_a
-    sheet_id: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    credentials: "service_account_a.json"
-
-  - name: channel_b
-    sheet_id: "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
-    credentials: "service_account_b.json"
-
-  - name: channel_c
-    sheet_id: "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-    credentials: "service_account_c.json"
-
-# 共通設定（任意）
-settings:
-  retry: 3
-  timeout: 30
+#ダミー
+genre: "政治"
