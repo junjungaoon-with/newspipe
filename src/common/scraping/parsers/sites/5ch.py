@@ -13,33 +13,16 @@ from src.common.google_drive.drive_uploader import upload_multiple_files_to_driv
 
 def parse_articles_from_top_page(top_page_html: str)->list[dict]:
     soup = BeautifulSoup(top_page_html, "lxml")
-    article_info = []
+    article_urls = []
 
     #[url,comments,title,Genre]のリストを作成
     for article_outer_element in soup.find_all("div", class_="article-outer hentry"):
 
         url = article_outer_element.find("h2",class_ = "article-title entry-title").find("a")["href"]
-        comments_text = article_outer_element.find("ul",class_ = "article-meta").find_all("li")[1].get_text()
-        # 正規表現で () 内を取得
-        match = re.search(r"\((.*?)\)", comments_text)
 
-        if match:
-            comments = match.group(1)
+        article_urls.append(url)
 
-        title = article_outer_element.find("h2",class_ = "article-title entry-title").find("a").get_text()
-
-        genre = article_outer_element.find("ul",class_ = "article-meta").find_all("li")[2].get_text()[:-3]
-        
-        article_info.append({
-            "url":url,
-            "comments":comments,
-            "title":title,
-            "genre":genre
-            })
-
-    return article_info
-
-
+    return article_urls
 
 
 

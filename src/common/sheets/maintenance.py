@@ -4,7 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 from src.common.sheets.client import get_sheet
 
-def delete_over_1000rows(settings: dict) -> None:
+def delete_over_max_rows(settings: dict) -> None:
     """
     Google スプレッドシート内の指定シートにおいて、
     データ行（ヘッダを除く）が MAX_DATA_ROWS 行を超えた場合に、

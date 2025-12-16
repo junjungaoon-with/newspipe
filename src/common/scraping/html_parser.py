@@ -19,9 +19,9 @@ def parse_article_list(html: str, parser_name: str) -> list[dict]:
 
     module_path = f"src.common.scraping.parsers.sites.{parser_name}"
     module = importlib.import_module(module_path)
-    article_info = module.parse_articles_from_top_page(html)
+    article_urls = module.parse_articles_from_top_page(html)
 
-    return article_info
+    return article_urls
 
 
 def parse_article_simple_info(html: str, parser_name: str) -> dict:

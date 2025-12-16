@@ -5,7 +5,6 @@ from pathlib import Path
 import importlib
 from datetime import datetime
 from time import sleep
-import logging
 
 from src.common.scraping.fetcher import fetch_html
 from src.common.scraping.html_parser import parse_article_list, parse_article_simple_info, parse_article_detail_info
@@ -18,7 +17,7 @@ from src.common.pipeline.build_row_values import build_row_values
 from src.common.gemini.client import call_gemini
 from src.common.gemini.build_prompt import build_title_prompt
 from src.common.sheets.repository import append_table,get_sheet,get_researched_urls,append_researched_urls
-from src.common.sheets.maintenance import delete_over_1000rows
+from src.common.sheets.maintenance import delete_over_max_rows
 from config.settings import load_settings
 from src.common.utils.logger import get_logger
 
@@ -101,7 +100,7 @@ def run_pipeline(settings: dict):
         return
 
     #シートのMAX_DATA_ROWSを超過していたら削除
-    delete_over_1000rows(settings)
+    delete_over_max_rows(settings)
 
     # ---------------------------------------------------------
     # 1 すべての取得元を巡回
@@ -121,34 +120,34 @@ def run_pipeline(settings: dict):
         logger.info(f"Fetching list page: {source_url}")
 
         html = fetch_html(source_url,settings)
-        articles = parse_article_list(html,parser_name)
+        article_urls = parse_article_list(html,parser_name)
 
-        logger.info(f" {len(articles)}個の 記事を取得しました。 from {source_url}")
+        logger.info(f" {len(article_urls)}個の 記事を取得しました。 from {source_url}")
 
         researched_url = get_researched_urls(settings)
 
         #リサーチ済みの物を省く
-        articles = [u for u in articles if u["url"] not in researched_url]
-        logger.info(f"{len(articles)}個の記事が新しいです。 {source_url}")
+        article_urls = [u for u in article_urls if u not in researched_url]
+        logger.info(f"{len(article_urls)}個の記事が新しいです。 {source_url}")
 
         # ---------------------------------------------------------
         # 2 各記事の詳細取得
         # ---------------------------------------------------------
-        for article in articles:
+        for article in article_urls:
 
             logger = get_logger(
                 channel,
                 channel=channel,
                 step="pipeline",
                 source=source_url,
-                article_url=article["url"],
+                article_url=article,
             )
 
-            logger.info(f"{article['url']}を精査します。")
+            logger.info(f"{article}を精査します。")
             #操作済みURLリストに追記
-            append_researched_urls([article["url"]],settings)
+            append_researched_urls([article],settings)
 
-            detail_html = fetch_html(article["url"],settings)
+            detail_html = fetch_html(article,settings)
             simple_info = parse_article_simple_info(detail_html,parser_name)
 
             title = simple_info["title"]
@@ -165,7 +164,7 @@ def run_pipeline(settings: dict):
             # 3 チャンネルのターゲットジャンル記事か判定(ex.野球かどうか？
             # ---------------------------------------------------------
             if any( i is None for i in (title,comments,genre) ):
-                logger.warning(f"記事情報の取得に失敗しました。タイトル:{title},URL:{article['url']}")
+                logger.warning(f"記事情報の取得に失敗しました。タイトル:{title},URL:{article}")
                 continue
 
             is_target = judge_article(
@@ -176,14 +175,14 @@ def run_pipeline(settings: dict):
             )
 
             if not is_target:
-                logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article['url']}")
+                logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article}")
                 continue
 
             # ---------------------------------------------------------
             # 4 ターゲットジャンルだったので情報を詳しく取得
             # ---------------------------------------------------------
             unique_id = article["url"].split("/")[-1].split(".")[0]
-            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article['url']} ===")
+            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article} ===")
             threads, pictures = parse_article_detail_info(article["url"],detail_html,parser_name,settings,drive_service)
 
             # ---------------------------------------------------------
@@ -191,9 +190,9 @@ def run_pipeline(settings: dict):
             # ---------------------------------------------------------
             num_media = len(list(dict.fromkeys(pictures)))
             is_thumbnail,thumbnail_pattern,player_info = make_thumbnail(title, threads, unique_id,settings,drive_service)
-            logger.warning(f"サムネイルの生成に成功しました。タイトル:{title},URL:{article['url']},pataern:{thumbnail_pattern},player:{player_info['name']}")
+            logger.warning(f"サムネイルの生成に成功しました。タイトル:{title},URL:{article},pataern:{thumbnail_pattern},player:{player_info['name']}")
             if not is_thumbnail:
-                logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title},URL:{article['url']}")
+                logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title},URL:{article}")
                 continue
 
             # ---------------------------------------------------------
