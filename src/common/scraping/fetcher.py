@@ -6,9 +6,6 @@ from time import sleep
 
 from src.common.utils.logger import get_logger
 
-logger = get_logger(__name__)
-
-
 
 # ユーザーエージェント（将来差し替え可能）
 HEADERS = {
@@ -21,6 +18,12 @@ HEADERS = {
 
 
 def fetch_html(url: str, settings: dict) -> str:
+
+    logger = get_logger(
+        settings["CHANNEL_NAME"],
+        channel=settings["CHANNEL_NAME"],
+        step="fetch_html",
+    )
     """
     HTML を取得する (requests + retry)
 

@@ -1,10 +1,13 @@
 source_urls:
-  - url: "https://livejupiter2.blog.jp/"
-    parser_name: 5ch
-    title_add_word: "【2ch・5ch】"
   - url: "http://blog.livedoor.jp/nanjstu/"
     parser_name: nanjmatome
     title_add_word: "【なんj】"
+  - url: "https://livejupiter2.blog.jp/"
+    parser_name: 5ch
+    title_add_word: "【2ch・5ch】"
+  - url: "https://news.yahoo.co.jp/categories/sports"
+    parser_name: yahoo
+    title_add_word: "【野球速報】"
 enabled: true
 
 genre: "野球"
@@ -26,7 +29,8 @@ closing_message: |
   野球の最新情報を毎日いち早くお届けしています
   チャンネル登録してもらえるとうれしいです！
 
-min_required_pictures: 3
+#最低必要画像枚数（この枚数あればOK）
+min_required_pictures: 2
 
 thumbnail_patterns:
   1: "静止画、640、中央上"

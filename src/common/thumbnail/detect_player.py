@@ -1,9 +1,16 @@
 import json
 
 from src.common.gemini.client import call_gemini
-
+from src.common.utils.logger import get_logger
 
 def detect_players(title: str, script_text: str, settings: dict) -> list[dict] | None:
+
+    logger = get_logger(
+        settings["CHANNEL_NAME"],
+        channel=settings["CHANNEL_NAME"],
+        step="detect_players",
+    )
+
     """
     タイトルと台本本文をもとに、Gemini API を利用して
     動画内で話題となっている人物（最大2名）を推定する関数。
@@ -83,6 +90,8 @@ def detect_players(title: str, script_text: str, settings: dict) -> list[dict] |
                           "required": ["players"]
                       }
                     )
+
+    
 
     if not res:
         return None

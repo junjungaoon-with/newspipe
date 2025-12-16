@@ -1,23 +1,37 @@
 import sys
 from pathlib import Path
-
+from time import sleep
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
 
 
 from config.settings import load_settings
+from src.common.utils.logger import setup_logger
 from src.common.pipeline.article_pipeline import run_pipeline
 def main():
-    
 
     # ここでチャンネルを指定！
-    channel_list = ["baseball",]
-    for channel in channel_list:
-        settings = load_settings(channel)
+    while True:
+        channel_list = ["baseball",]
+        for channel in channel_list:
+            settings = load_settings(channel)
+            
+            if not settings["IS_ENABLED"]:
+                continue 
 
-        if not settings["IS_ENABLED"]:
-            continue 
-        run_pipeline(settings)
+            logger = setup_logger(
+                name=channel,
+                log_dir=settings["LOG_DIR"],
+            )
+
+            try:
+                run_pipeline(settings)
+            except Exception as e:
+                logger.exception("Pipeline crashed")
+                sleep(300)
+                pass
+        sleep(600)
+        
 
 if __name__ == "__main__":
     main()

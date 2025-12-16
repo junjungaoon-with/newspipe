@@ -29,7 +29,7 @@ def load_channel_config(channel_name: str) -> dict:
 
 
 def load_channel_env(channel_name: str) -> dict:
-    env_path = BASE_DIR / f".credentials/{channel_name}/.env"
+    env_path = BASE_DIR / f"credentials/{channel_name}/.env"
     
     if env_path.exists():
         return dotenv_values(env_path)

@@ -1,9 +1,9 @@
 from PIL import Image
 import os
 import base64
-
+import requests
+from urllib.parse import urlparse
 from src.common.utils.text_utils import extract_ext
-
 
 
 
@@ -33,24 +33,55 @@ def is_long_gif(local_path: str) -> bool:
             return False
         
 
-def save_base64_image(data_url, dest_path, settings):
-    header, encoded = data_url.split(",", 1)
+def save_image(data, dest_path, settings):
+    """
+    data:
+      - data:image/...;base64,... 形式
+      - https://example.com/image.jpg 形式
+    """
 
-    # MIMEタイプをチェック
-    if "png" in header.lower():
-        ext = ".png"
-    elif "jpeg" in header.lower() or "jpg" in header.lower():
-        ext = ".jpg"
-    else:
-        ext = ".jpg"  # デフォルト
+    # 保存ディレクトリ
+    save_dir = settings["SAVE_DIR"]
 
-    dest_path = dest_path + ext
+    # ---------- base64 (data URL) ----------
+    if isinstance(data, str) and data.startswith("data:image"):
+        if "," not in data:
+            raise ValueError(f"Invalid base64 data URL: {data[:100]}")
 
-    data = base64.b64decode(encoded)
-    local_path = os.path.join(settings["SAVE_DIR"], dest_path)
-    with open(local_path, "wb") as f:
-        f.write(data)
+        header, encoded = data.split(",", 1)
 
-    return local_path
+        # 拡張子判定
+        if "png" in header.lower():
+            ext = ".png"
+        elif "jpeg" in header.lower() or "jpg" in header.lower():
+            ext = ".jpg"
+        else:
+            ext = ".jpg"
 
+        data_bytes = base64.b64decode(encoded)
+        local_path = os.path.join(save_dir, dest_path + ext)
 
+        with open(local_path, "wb") as f:
+            f.write(data_bytes)
+
+        return local_path
+
+    # ---------- URL ----------
+    if isinstance(data, str) and data.startswith(("http://", "https://")):
+        parsed = urlparse(data)
+        _, ext = os.path.splitext(parsed.path)
+        if not ext:
+            ext = ".jpg"
+
+        local_path = os.path.join(save_dir, dest_path + ext)
+
+        r = requests.get(data, timeout=10)
+        r.raise_for_status()
+
+        with open(local_path, "wb") as f:
+            f.write(r.content)
+
+        return local_path
+
+    # ---------- 不明 ----------
+    raise ValueError(f"Unsupported image format: {repr(data)[:200]}")

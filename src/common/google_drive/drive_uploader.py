@@ -1,6 +1,6 @@
 from googleapiclient.http import MediaFileUpload
 from typing import List, Dict
-
+from src.common.utils.logger import get_logger
 
 def upload_multiple_files_to_drive(
     drive_service,
@@ -33,6 +33,11 @@ def upload_multiple_files_to_drive(
             ]
     """
 
+    logger = get_logger(
+        settings["CHANNEL_NAME"],
+        channel=settings["CHANNEL_NAME"],
+        step="drive_upload"
+    )
     uploaded_results = []
     folder_id = settings["DRIVE_ID"]
 
@@ -57,7 +62,7 @@ def upload_multiple_files_to_drive(
                 .execute()
             )
 
-            print(f"✅ アップロード成功: {uploaded['name']} → {uploaded['webViewLink']}")
+            logger.info(f"ファイルアップロード成功: {filename} (URL: {uploaded['webViewLink']})")
 
             uploaded_results.append(
                 {
@@ -68,7 +73,7 @@ def upload_multiple_files_to_drive(
             )
 
         except Exception as e:
-            print(f"❌ アップロード失敗: {filename} (error: {e})")
+            logger.error(f"ファイルアップロード失敗: {filename} (error: {e})")
 
     return uploaded_results
 
@@ -104,6 +109,11 @@ def upload_file_to_drive(
                 }
             アップロード失敗時は None を返す。
     """
+    logger = get_logger(
+        settings["CHANNEL_NAME"],
+        channel=settings["CHANNEL_NAME"],
+        step="drive_upload"
+    )
 
     try:
         folder_id = settings["DRIVE_ID"]
@@ -123,7 +133,7 @@ def upload_file_to_drive(
             .execute()
         )
 
-        print(f"✅ アップロード成功: {uploaded['name']} → {uploaded['webViewLink']}")
+        logger.info(f"ファイルアップロード成功: {filename} (URL: {uploaded['webViewLink']})")
 
         return {
             "id": uploaded["id"],
@@ -132,5 +142,5 @@ def upload_file_to_drive(
         }
 
     except Exception as e:
-        print(f"❌ アップロード失敗: {filename} (error: {e})")
-        return None
+        logger.error(f"ファイルアップロード失敗: {filename} (error: {e})")
+        raise e

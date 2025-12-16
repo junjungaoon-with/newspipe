@@ -1,6 +1,9 @@
 from src.common.gemini.client import call_gemini
+from src.common.utils.logger import get_logger
 
 def judge_article (title: str, comments: str, genre: str , settings: dict,) -> bool:
+
+
     prompt = f"""
 以下は記事の情報です。判定してください。
 

@@ -6,11 +6,18 @@ from src.common.thumbnail.selection_logic import selection_logic
 from common.thumbnail.builders import build_single_thumbnail,build_double_thumbnail,build_wide_thumbnail
 from common.utils.folder import clear_local_folder
 from common.google_drive.drive_uploader import upload_file_to_drive
+from src.common.utils.logger import get_logger
 
 # ---------------------------------------------------------
 # 5 サムネイルの生成
 # ---------------------------------------------------------
 def make_thumbnail(title, script_text, unique_id, settings, drive_service):
+    logger = get_logger(
+        settings["CHANNEL_NAME"],
+        channel=settings["CHANNEL_NAME"],
+        step="make_thumbnail",
+    )
+
     # 1. 人物検出
     result = detect_players(title, script_text, settings)
 
@@ -23,11 +30,12 @@ def make_thumbnail(title, script_text, unique_id, settings, drive_service):
 
     #選手情報がないときの処理
     if first["name"] is None:
-        print("選手情報が検出できませんでした。")
+        logger.warning("サムネイル用の選手情報が取得できませんでした。")
         return False, None, first
 
     # 3. サムネタイプの判定
-    pattern = selection_logic(first, second)
+    pattern = selection_logic(first, second, settings)
+
 
     is_complete = False
 

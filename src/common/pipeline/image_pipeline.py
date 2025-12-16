@@ -19,10 +19,10 @@ def fetch_and_upload_main_images(
     urls = search_main_pictures(player_name, player_team, settings)
 
     # Step 2: ローカル保存
-    local_paths = download_and_save_images(urls, settings["SAVE_DIR"], player_name)
+    media_infos = download_and_save_images(urls, settings["SAVE_DIR"], player_name, unique_id,settings)
 
     # Step 3: Google Drive アップロード
-    uploaded_results = upload_multiple_files_to_drive(drive_service,local_paths, unique_id, settings)
+    uploaded_results = upload_multiple_files_to_drive(drive_service,media_infos, settings)
 
     print(f"=== {player_name} の画像アップロード完了 ===")
 

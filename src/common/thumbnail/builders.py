@@ -1,7 +1,7 @@
 import os
 
 from src.common.scraping.run_selenium import set_up_selenium ,serch_picture_by_selenium
-from src.common.media.media_utils import save_base64_image
+from src.common.media.media_utils import save_image
 from common.thumbnail.analayze_image import compute_face_area_ratios,is_within_aspect_ratio,judge_face_fully_in_top_half
 from common.thumbnail.make_thumb import concat_two_images_fit_height_then_width1920
 
@@ -21,7 +21,7 @@ def build_single_thumbnail( player, settings):
 
     for i, item in enumerate(items_list, start=1):
         tmp_base = f"__tmp_{player_name}_{i}"
-        local_path = save_base64_image(item, tmp_base, settings)
+        local_path = save_image(item, tmp_base, settings)
 
         sum_ratio, max_ratio = compute_face_area_ratios(local_path, settings)
         metric = max_ratio if settings["FACE_RATIO_METRIC"] == "max" else sum_ratio
@@ -75,7 +75,7 @@ def build_wide_thumbnail( player, settings):
 
     for i, item in enumerate(items_list, start=1):
         tmp_base = f"__tmp_{player_name}_{i}"
-        local_path = save_base64_image(item, tmp_base,settings)
+        local_path = save_image(item, tmp_base,settings)
         file_path_list.append(local_path)
 
     

@@ -5,8 +5,6 @@ from src.common.utils.logger import get_logger
 from src.common.utils.text_utils import is_url
 
 
-logger = get_logger(__name__)
-
 
 def parse_article_list(html: str, parser_name: str) -> list[dict]:
     """
@@ -23,7 +21,6 @@ def parse_article_list(html: str, parser_name: str) -> list[dict]:
     module = importlib.import_module(module_path)
     article_info = module.parse_articles_from_top_page(html)
 
-    logger.info(f"[PARSER] Extracted {len(article_info)} articles")
     return article_info
 
 
@@ -49,7 +46,6 @@ def parse_article_simple_info(html: str, parser_name: str) -> dict:
     module = importlib.import_module(module_path)
     article_info = module.extract_simple_info_from_html(html)
 
-    logger.info(f"[PARSER] Extracted {len(article_info)} articles")
 
     return article_info
 

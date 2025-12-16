@@ -1,3 +1,4 @@
+
 """
 Gemini API 呼び出しの共通クライアント。
 """
@@ -34,6 +35,9 @@ def call_gemini(prompt: str, settings: dict, schema: dict = None, temperature: f
     if schema:
         payload["generationConfig"]["responseSchema"] = schema
     res = requests.post(url, json=payload, timeout=60)
+    logger.debug(f"Gemini response status: {res.status_code}, response text: {res.text}")
+    res.raise_for_status()
+
     data = res.json()
     # Geminiの返答からJSONをパース
     text = data["candidates"][0]["content"]["parts"][0]["text"]
