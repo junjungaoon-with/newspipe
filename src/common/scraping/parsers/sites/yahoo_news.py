@@ -1,15 +1,16 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urljoin
+from os import path
 
 from src.common.utils.list_utils import extract_only_long_gif_urls, process_raw_threads_from_long_gif_info
 from src.common.utils.process_values import preprocess_raw_threads
 from src.common.scraping.html_parser import extract_media_url
-from src.common.scraping.parsers.preprocess import preprocess_for_5ch
 from common.pipeline.thread_builder import thread_builder
 from src.common.media.save_thread_images import save_media_from_url
 from src.common.google_drive.drive_uploader import upload_multiple_files_to_drive
-
+from src.common.scraping.fetcher import fetch_html
+from src.common.utils.text_utils import normalize_url
 
 def parse_articles_from_top_page(top_page_html: str)->list[dict]:
     soup = BeautifulSoup(top_page_html, "lxml")
@@ -50,34 +51,28 @@ def extract_simple_info_from_html(html: str) -> dict:
     """
     soup = BeautifulSoup(html, "lxml")
     article_info = []    
-    comments = []
+    article_list = []
 
     #[url,comments,title,Genre]のリストを作成
-    for article_outer_element in soup.find_all("div", class_="article-outer hentry"):
+    for article_outer_element in soup.find_all("div", id="contentsWrap"):
 
-        url = article_outer_element.find("h2",class_ = "article-title entry-title").find("a")["href"]
-        num_comments_text = article_outer_element.find("li",class_ = "article-comment-count").get_text()
-        # 正規表現で () 内を取得
-        match = re.search(r"\((.*?)\)", num_comments_text)
+   
+        num_comments = article_outer_element.find("span",class_ = "sc-1n9vtw0-3 fdshGm").get_text()
 
-        if match:
-            num_comments = match.group(1)
+        title = article_outer_element.find("h1",class_ = "sc-uzx6gd-1 lljVgU").get_text()
 
-        title = article_outer_element.find("h2",class_ = "article-title entry-title").find("a").get_text()
-
-        genre = article_outer_element.find("dd",class_ = "article-category").get_text()
+        genre = "unknown"
         
-        comments_list = []
         #コメントのリストを作成
-        for comment_b_element in soup.find("div", class_="article-body-inner").find_all("div",class_="t_b"):
-            comment = comment_b_element.get_text()
-            comments_list.append(comment)
+        for article_element in soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget"):
+            article = article_element.get_text()
+            article_list.append(article)
 
 
     article_info={
         "title": title,
         "num_comments": num_comments,
-        "comments": comments_list,
+        "comments": article_list,#記事本文全体だがほかの記事元と合わせるためこう呼ぶ
         "genre": genre,
 
     }
@@ -88,16 +83,8 @@ def parse_thread_content(url: str, html: str)-> list[str]:
     """
     HTML からスレッド本文のテキストおよび有効な画像URLを抽出する関数。
 
-    指定された HTML を解析し、テキスト要素（span, b）および画像URLを
-    出現順にリストとして返す。
-
-    取得する内容の基準は以下の通り：
-
-    - span / b タグ：レス番号（<dt> 配下）は除外し、空白を除いたテキストを収集
-    - 画像URL：
-        - 拡張子が .jpg または .gif
-        - "-s" を含むサムネイル画像は除外
-        - Twitter / Twimg のURLは除外
+    指定された HTML を解析し、記事本文内のテキスト要素および画像URLを
+    出現順にリストとして返します。
 
     Args:
         url (str):
@@ -114,38 +101,17 @@ def parse_thread_content(url: str, html: str)-> list[str]:
     # BeautifulSoupで記事本文の要素を探索
     # -------------------------------------------
     soup = BeautifulSoup(html, "lxml")
-    container = soup.find("div", class_="article-body-inner")
 
     combined = []  # テキストとURLを順番通りに格納
 
-    if container:
-        for tag in container.find_all(True, recursive=True):
+    #記事のサムネを取得
+    thumbnail_url = soup.find("img", class_="riff-Thumbnail__image--image").get("src")
+    thumbnail_url = normalize_url(thumbnail_url)
+    combined.append(thumbnail_url)
 
-            # --- 1. span / b タグのテキスト抽出 ---
-            class_list = tag.get("class")
-            
-            if class_list == None:continue
-
-            if "t_b" in class_list :
-                if tag.find_parent("dt"):  # レス番号などは除外
-                    continue
-                text = tag.get_text(strip=True)
-                if text:
-                    combined.append(text)
-
-            # --- 2. 画像やリンクタグのURL抽出 ---
-            if tag.has_attr("src") or tag.has_attr("href"):
-                u = tag.get("src") or tag.get("href")
-                if u:
-                    u = urljoin(url, u)  # 相対URLを絶対URLへ変換
-
-                    # jpg/gif で終わり、不要なURLは除外
-                    if (
-                        re.search(r'\.(jpg|gif)(?:\?.*)?$', u, re.IGNORECASE)
-                        and "twitter" not in u
-                        and "twimg" not in u
-                    ):
-                        combined.append(u)
+    article_elemnt = soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget")
+    article = article_elemnt.get_text()
+    combined.append(article)
     return combined
 
 
@@ -180,10 +146,9 @@ def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_ser
     raw_threads = parse_thread_content(url,html)
 
     # -------------------------------------------
-    # 重複除去  不要な末尾要素を削除(このサイト特有の特別処理)
+    # 重複除去
     # -------------------------------------------
     raw_threads = preprocess_raw_threads(raw_threads)
-    raw_threads = preprocess_for_5ch(raw_threads,url)
     
     # -------------------------------------------
     # スレッドにある全画像の保存
@@ -218,3 +183,27 @@ def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_ser
     # -------------------------------------------
     threads, pictures = thread_builder(raw_threads)
     return threads, pictures
+
+
+def extract_comments(url: str, source: dict, settings:dict,) -> str:
+    """
+    指定URLの記事からコメント部分を抽出し、文字列で返す。
+
+    Args:
+        url (str): 記事URL
+
+    Returns:
+        str:
+            コメント部分のテキスト
+    """
+
+    #url = path.join(url, source.get("comment_add_url_word",""))
+ 
+    detail_html = fetch_html(url + f"/{source.get('comment_add_url_word','')}",settings)
+    comment_soup = BeautifulSoup(detail_html, "lxml")
+    extracted_comments_html = comment_soup.findAll("p", class_="sc-169yn8p-10 hYFULX")
+    comments = [tag.get_text(strip=True) for tag in extracted_comments_html]
+    # カンマ区切りの1つの文字列にまとめる
+    comments_text = ",".join(comments)
+
+    return comments_text

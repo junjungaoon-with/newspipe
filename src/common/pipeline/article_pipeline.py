@@ -5,9 +5,10 @@ from pathlib import Path
 import importlib
 from datetime import datetime
 from time import sleep
+import re
 
 from src.common.scraping.fetcher import fetch_html
-from src.common.scraping.html_parser import parse_article_list, parse_article_simple_info, parse_article_detail_info
+from src.common.scraping.html_parser import parse_article_list, parse_article_simple_info, parse_article_detail_info, parse_comments
 from src.common.utils.logger import get_logger
 from src.common.google_drive.drive_client import get_drive_service
 from src.common.google_drive.drive_utils import verify_drive_images_exist
@@ -19,7 +20,8 @@ from src.common.gemini.build_prompt import build_title_prompt
 from src.common.sheets.repository import append_table,get_sheet,get_researched_urls,append_researched_urls
 from src.common.sheets.maintenance import delete_over_max_rows
 from config.settings import load_settings
-from src.common.utils.logger import get_logger
+from src.common.gemini.build_prompt import build_summarize_article_prompt, build_summarize_comments_prompt
+from src.common.build_row_values.preprocess import formattied_scripts
 
 def load_judge(settings: dict):
     """
@@ -133,21 +135,21 @@ def run_pipeline(settings: dict):
         # ---------------------------------------------------------
         # 2 各記事の詳細取得
         # ---------------------------------------------------------
-        for article in article_urls:
+        for article_url in article_urls:
 
             logger = get_logger(
                 channel,
                 channel=channel,
                 step="pipeline",
                 source=source_url,
-                article_url=article,
+                article_url=article_url,
             )
 
-            logger.info(f"{article}を精査します。")
+            logger.info(f"{article_url}を精査します。")
             #操作済みURLリストに追記
-            append_researched_urls([article],settings)
+            append_researched_urls([article_url],settings)
 
-            detail_html = fetch_html(article,settings)
+            detail_html = fetch_html(article_url,settings)
             simple_info = parse_article_simple_info(detail_html,parser_name)
 
             title = simple_info["title"]
@@ -164,7 +166,7 @@ def run_pipeline(settings: dict):
             # 3 チャンネルのターゲットジャンル記事か判定(ex.野球かどうか？
             # ---------------------------------------------------------
             if any( i is None for i in (title,comments,genre) ):
-                logger.warning(f"記事情報の取得に失敗しました。タイトル:{title},URL:{article}")
+                logger.warning(f"記事情報の取得に失敗しました。タイトル:{title},URL:{article_url}")
                 continue
 
             is_target = judge_article(
@@ -175,39 +177,15 @@ def run_pipeline(settings: dict):
             )
 
             if not is_target:
-                logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article}")
+                logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article_url}")
                 continue
 
             # ---------------------------------------------------------
-            # 4 ターゲットジャンルだったので情報を詳しく取得
+            # 4-1 ターゲットジャンルだったので情報を詳しく取得
             # ---------------------------------------------------------
-            unique_id = article["url"].split("/")[-1].split(".")[0]
-            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article} ===")
-            threads, pictures = parse_article_detail_info(article["url"],detail_html,parser_name,settings,drive_service)
-
-            # ---------------------------------------------------------
-            # 5 サムネイルの生成
-            # ---------------------------------------------------------
-            num_media = len(list(dict.fromkeys(pictures)))
-            is_thumbnail,thumbnail_pattern,player_info = make_thumbnail(title, threads, unique_id,settings,drive_service)
-            logger.warning(f"サムネイルの生成に成功しました。タイトル:{title},URL:{article},pataern:{thumbnail_pattern},player:{player_info['name']}")
-            if not is_thumbnail:
-                logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title},URL:{article}")
-                continue
-
-            # ---------------------------------------------------------
-            # 6 サムネイル以外の画像を取得
-            # ---------------------------------------------------------
-            
-            if player_info["name"] != None and num_media <= settings["MIN_REQUIRED_PICTURES"]:
-                #2 画像取得
-                uploaded_picuture  = fetch_and_upload_main_images(
-                    player_info,
-                    unique_id,
-                    drive_service,
-                    settings
-                )
-
+            unique_id = article_url.split("/")[-1].split(".")[0]
+            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:10]}... URL:{article_url} ===")
+            threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
 
             # ---------------------------------------------------------
             # 7 指示書に必要な情報を作成
@@ -226,6 +204,73 @@ def run_pipeline(settings: dict):
                 },
                 temperature=0.5
             )
+
+            # ---------------------------------------------------------
+            # 4-2 スレッド形式でない場合コメントを取得
+            # ---------------------------------------------------------
+            if not source["is_thread"]:
+                logger.info(f"=== スレッド形式でない記事のためコメントを取得  {title[:10]}... URL:{article_url} ===")
+                #コメント部分を取得
+                comments = parse_comments(article_url, parser_name,source, settings)
+ 
+            # ---------------------------------------------------------
+            # 4-2 スレッド形式でない場合、本文とコメントを要約
+            # ---------------------------------------------------------
+            if not source["is_thread"]:
+                logger.info(f"=== スレッド形式でない記事のため本文とコメントを要約  {title[:10]}... URL:{article_url} ===")
+                article_prompt = build_summarize_article_prompt(
+                    article=threads,
+                    title=title,
+                    source=source,
+                )
+                #本文を要約してthreadsに格納
+                threads = call_gemini(
+                    prompt=article_prompt,
+                    settings=settings,
+                    schema={"type": "object", "properties": {"script": {"type": "array", "items": {"type": "string"}}}},
+                    temperature=0.5
+                )
+
+                comments_prompt = build_summarize_comments_prompt(
+                    comments=comments,
+                    source=source,
+                    title=title,
+                )
+
+                #コメントを要約してcommentsに格納
+                comments = call_gemini(
+                    prompt=comments_prompt,
+                    settings=settings,
+                    schema={"type": "object", "properties": {"script": {"type": "array", "items": {"type": "string"}}}},
+                    temperature=0.5
+                )
+                #threadsにコメントを追加
+                threads = [*threads["script"], *comments["script"]]
+
+
+            # ---------------------------------------------------------
+            # 5 サムネイルの生成
+            # ---------------------------------------------------------
+            is_thumbnail,thumbnail_pattern,player_info = make_thumbnail(title, threads, unique_id,settings,drive_service)
+            logger.warning(f"サムネイルの生成に成功しました。タイトル:{title},URL:{article_url},pataern:{thumbnail_pattern},player:{player_info['name']}")
+            if not is_thumbnail:
+                logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title},URL:{article_url}")
+                continue
+
+            # ---------------------------------------------------------
+            # 6 サムネイル以外の画像を取得
+            # ---------------------------------------------------------
+            num_media = len(list(dict.fromkeys(pictures)))
+            if player_info["name"] != None and num_media <= settings["MIN_REQUIRED_PICTURES"]:
+                #2 画像取得
+                uploaded_picuture  = fetch_and_upload_main_images(
+                    player_info,
+                    unique_id,
+                    drive_service,
+                    settings
+                )
+
+
 
             # ---------------------------------------------------------
             # 7 指示書を作成
@@ -260,7 +305,7 @@ def run_pipeline(settings: dict):
                     break
                 sleep(5)
 
-            logger.info(f"記事の指示書をシートに出力しました。タイトル:{title},URL:{article['url']}")
+            logger.info(f"記事の指示書をシートに出力しました。タイトル:{title},URL:{article_url}")
 
 
 

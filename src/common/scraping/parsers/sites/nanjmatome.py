@@ -5,7 +5,6 @@ from urllib.parse import urljoin
 from src.common.utils.list_utils import extract_only_long_gif_urls, process_raw_threads_from_long_gif_info
 from src.common.utils.process_values import preprocess_raw_threads
 from src.common.scraping.html_parser import extract_media_url
-from src.common.scraping.parsers.preprocess import preprocess_for_5ch
 from common.pipeline.thread_builder import thread_builder
 from src.common.media.save_thread_images import save_media_from_url
 from src.common.google_drive.drive_uploader import upload_multiple_files_to_drive
@@ -52,7 +51,6 @@ def extract_simple_info_from_html(html: str) -> dict:
     #[url,comments,title,Genre]のリストを作成
     for article_outer_element in soup.find_all("div", class_="article-outer hentry"):
 
-        url = article_outer_element.find("h2",class_ = "article-title entry-title").find("a")["href"]
         num_comments_text = article_outer_element.find("li",class_ = "article-comment-count").get_text()
         # 正規表現で () 内を取得
         match = re.search(r"\((.*?)\)", num_comments_text)
@@ -177,10 +175,9 @@ def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_ser
     raw_threads = parse_thread_content(url,html)
 
     # -------------------------------------------
-    # 重複除去  不要な末尾要素を削除(このサイト特有の特別処理)
+    # 重複除去
     # -------------------------------------------
     raw_threads = preprocess_raw_threads(raw_threads)
-    raw_threads = preprocess_for_5ch(raw_threads,url)
     
     # -------------------------------------------
     # スレッドにある全画像の保存

@@ -3,7 +3,7 @@ from src.common.utils.process_values import remove_num,skip_short_item
 from urllib.parse import urlparse
 import os
 from src.common.utils.text_utils import remove_url
-
+from src.common.utils.text_utils import is_url
 
 
 
@@ -43,6 +43,18 @@ def thread_builder(raw_threads :list[str])->tuple[list[str], list[str]]:
     temp_pic_list = []   # 一時的な画像リスト
     temp_media_url = []  # 一時的なURLリスト
     media_count = 1      # 画像番号カウンタ
+
+    # -------------------------------------------
+    # 特殊パターンを処理主にyahoo ニュース用
+    # -------------------------------------------
+    if is_url(raw_threads[0]) and not is_url(raw_threads[1]) and len(raw_threads) == 2:
+
+        file_id = raw_threads[0].split('/')[-1].split('.')[0]
+        path = urlparse(raw_threads[0]).path
+        _, ext = os.path.splitext(path)
+        pictures.append(f"{file_id}{ext}")
+        threads.append(raw_threads[1])
+        return threads, pictures
     
 
     # -------------------------------------------

@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse,urlunparse
 
 def contains_japanese(text: str) -> bool:
     # ひらがな・カタカナ・漢字が含まれているかチェック
@@ -11,7 +11,14 @@ def is_url(text: str) -> bool:
     #URLかどうかチェック
     return text.startswith("http") and not contains_japanese(text)
 
-
+def normalize_url(url: str) -> str:
+    # URLの正規化処理
+    url.strip()
+    parsed = urlparse(url)
+    clean_url = urlunparse(
+        (parsed.scheme, parsed.netloc, parsed.path, "", "", "")
+    )
+    return clean_url
 
 def remove_url(text: str) -> str:
     """

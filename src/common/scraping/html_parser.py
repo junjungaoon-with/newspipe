@@ -82,3 +82,23 @@ def extract_media_url(raw_threads: list[str]) -> list[str]:
         if is_url(url_or_text):
             media_urls.append(url_or_text)
     return media_urls
+
+def parse_comments(url: str, parser_name: str, source: dict, settings:dict) -> list[str]:
+    """
+    指定URLの記事からコメント部分を抽出し返す。
+
+    Args:
+        url (str): 記事URL
+        parser_name (str): パーサー名(ex. "yahoo_news")
+        settings(dict)
+
+    Returns:
+        list[str]:
+            (comments)
+    """
+
+    module_path = f"src.common.scraping.parsers.sites.{parser_name}"
+    module = importlib.import_module(module_path)
+    comments = module.extract_comments(url, source, settings)
+
+    return comments
