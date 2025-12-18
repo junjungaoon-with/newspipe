@@ -17,6 +17,7 @@ def build_row_values(
     pictures: list[str],
     unique_id: str,
     thumbnail_pattern: int,
+    source: dict,
     settings: dict,
 ):
     """ スプレッドシートの1指示書分のデータを生成する
@@ -29,7 +30,8 @@ def build_row_values(
         pictures (list[str]): 画像URLのリスト
         unique_id (str): 記事のユニークID
         thumbnail_pattern (int): サムネイルパターン番号
-        settings (dict): 設定値の辞書
+        source (dict): 記事のソース情報
+        settings (dict): パイプライン設定値
     Returns:
         list[list[str]]: スプレッドシートの1指示書分のデータ
     """
@@ -57,6 +59,7 @@ def build_row_values(
     # ============================================================
     #  3. タイトル整形
     # ============================================================
+    new_title = new_title + source.get("title_add_word", "")
     text2_after = remove_sumikakko(new_title)
     # ============================================================
     #  4. merge_text3（締めメッセージ）を追加し整形

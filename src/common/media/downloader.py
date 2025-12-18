@@ -17,7 +17,7 @@ def download_and_save_images(urls: List[str], save_dir: str, prefix: str, unique
         local_path = save_image(url, local_base, settings)
 
         if local_path:
-            temp = {"local_path": local_path, "filename": f"{i+1}_{unique_id}"}
+            temp = {"local_path": local_path, "filename": f"{i}_{unique_id}.jpg"}
             
             media_infos.append(temp)
         else:

@@ -38,7 +38,7 @@ def get_drive_service(settings) ->any:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(settings["JSON_PATH"], SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(os.path.join(settings["JSON_PATH"], "credentials.json"), SCOPES)
             creds = flow.run_local_server(port=0)
         # トークンを保存
         with open(token_path, 'wb') as token:

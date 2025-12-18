@@ -18,6 +18,14 @@ def get_researched_urls(settings: dict) -> set:
     sheet = get_sheet(settings["SHEET_SCANNED"],settings)
     return set(filter(None, sheet.col_values(1)))
 
+def get_sheet_values( sheet_name: str, settings: dict) -> list[list]:
+    """
+    指定シートの全データを2次元リストで返す。
+    """
+    sheet = get_sheet(sheet_name,settings)
+    value = sheet.get_all_values()
+    return value
+
 def append_researched_urls(urls: Union[str, List[str]], settings: dict) -> None:
     if not urls:
         return

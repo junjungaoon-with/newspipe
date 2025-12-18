@@ -97,9 +97,6 @@ def load_settings(channel_name: str) -> dict:
         #サムネイル以外の画像設定
         "MAIN_PIC_EXTRA_WORD": f"野球風景 ",
 
-        #指示書作成設定
-        "TITLE_ADD_WORD": raw.get("title_add_word", ""),
-
         "CLOSING_MESSAGE": raw.get("closing_message", ""),
         "MIN_REQUIRED_PICTURES": raw.get("min_required_pictures", 3),
 
@@ -110,7 +107,7 @@ def load_settings(channel_name: str) -> dict:
         "DEFAULT_TEXT2_SETTING": raw.get("default_text2_setting", ""),
 
         "GIF_IMAGE_SETTING": raw.get("gif_image_setting", ""),
-        "BGM_MAP": raw.get("bgm_map", {}),
+        "BGM_MAP": raw.get("bgm_map", {})[0],
 
         #指示書分split設定
         "SPLIT_MAX_LEN": raw.get("split_max_len", 60),
@@ -127,7 +124,7 @@ def load_settings(channel_name: str) -> dict:
 
         #認証
 
-        "JSON_PATH" : BASE_DIR / "credentials" / channel_name ,
+        "JSON_PATH" : BASE_DIR / "credentials" / channel_name,
         "TOKEN_PICKLE_PATH" : BASE_DIR / "credentials" / channel_name / "token.pickle",
 
         #通信

@@ -17,11 +17,11 @@ from src.common.pipeline.image_pipeline import fetch_and_upload_main_images
 from src.common.pipeline.build_row_values import build_row_values
 from src.common.gemini.client import call_gemini
 from src.common.gemini.build_prompt import build_title_prompt
-from src.common.sheets.repository import append_table,get_sheet,get_researched_urls,append_researched_urls
+from src.common.sheets.repository import append_table,get_sheet,get_researched_urls,append_researched_urls,get_sheet_values
 from src.common.sheets.maintenance import delete_over_max_rows
 from config.settings import load_settings
 from src.common.gemini.build_prompt import build_summarize_article_prompt, build_summarize_comments_prompt
-from src.common.build_row_values.preprocess import formattied_scripts
+
 
 def load_judge(settings: dict):
     """
@@ -77,6 +77,10 @@ def run_pipeline(settings: dict):
     channel = settings["CHANNEL_NAME"]
 
     settings = load_settings(channel)
+
+    #テスト
+    # for i in settings["MAINTENANCE_SHEETS"]:
+    #     get_sheet_values(i,settings)
 
     logger = get_logger(
         channel,
@@ -146,8 +150,7 @@ def run_pipeline(settings: dict):
             )
 
             logger.info(f"{article_url}を精査します。")
-            #操作済みURLリストに追記
-            append_researched_urls([article_url],settings)
+
 
             detail_html = fetch_html(article_url,settings)
             simple_info = parse_article_simple_info(detail_html,parser_name)
@@ -167,6 +170,8 @@ def run_pipeline(settings: dict):
             # ---------------------------------------------------------
             if any( i is None for i in (title,comments,genre) ):
                 logger.warning(f"記事情報の取得に失敗しました。タイトル:{title},URL:{article_url}")
+                #操作済みURLリストに追記
+                append_researched_urls([article_url],settings)
                 continue
 
             is_target = judge_article(
@@ -284,6 +289,7 @@ def run_pipeline(settings: dict):
                 pictures=pictures,
                 unique_id=unique_id,
                 thumbnail_pattern=thumbnail_pattern,
+                source=source,
                 settings=settings,
                 )
             
@@ -306,6 +312,8 @@ def run_pipeline(settings: dict):
                 sleep(5)
 
             logger.info(f"記事の指示書をシートに出力しました。タイトル:{title},URL:{article_url}")
+            #操作済みURLリストに追記
+            append_researched_urls([article_url],settings)
 
 
 

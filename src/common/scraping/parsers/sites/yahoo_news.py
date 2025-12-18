@@ -56,7 +56,7 @@ def extract_simple_info_from_html(html: str) -> dict:
     #[url,comments,title,Genre]のリストを作成
     for article_outer_element in soup.find_all("div", id="contentsWrap"):
 
-   
+
         num_comments = article_outer_element.find("span",class_ = "sc-1n9vtw0-3 fdshGm").get_text()
 
         title = article_outer_element.find("h1",class_ = "sc-uzx6gd-1 lljVgU").get_text()
