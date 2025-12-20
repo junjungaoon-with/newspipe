@@ -20,30 +20,8 @@ from src.common.gemini.build_prompt import build_title_prompt
 from src.common.sheets.repository import append_table,get_sheet,get_researched_urls,append_researched_urls,get_sheet_values
 from src.common.sheets.maintenance import delete_over_max_rows
 from config.settings import load_settings
-from src.common.gemini.build_prompt import build_summarize_article_prompt, build_summarize_comments_prompt
+from src.common.gemini.build_prompt import build_summarize_article_prompt, build_summarize_comments_prompt, judge_target_prompt
 from src.common.utils.list_utils import is_too_long
-
-def load_judge(settings: dict):
-    """
-    指定チャンネルの judge モジュールを動的読み込みし、
-    judge_article 関数を返す。
-
-    Parameters
-    ----------
-    channel : str
-        チャンネル名（例: baseball）
-
-    Returns
-    -------
-    function
-        judge_article(title, text, config) を受け取る関数
-    """
-
-    channel = settings["CHANNEL_NAME"]
-    module_path = f"src.channels.{channel}.judge"
-    module = importlib.import_module(module_path)
-    return module.judge_article
-
 
 def load_config(channel_name: str) -> dict:
     """
@@ -96,7 +74,6 @@ def run_pipeline(settings: dict):
 
     logger.info("========== Article Pipeline START ==========")
     logger.info(f"channel={channel}")
-    judge_article = load_judge(settings)
 
     #Google DriveのOAutu認証
     drive_service = get_drive_service(settings)
@@ -174,15 +151,33 @@ def run_pipeline(settings: dict):
                 append_researched_urls([article_url],settings)
                 continue
 
-            is_target = judge_article(
+
+            is_target_prompt = judge_target_prompt(
                 title=title,
                 comments=comments,
                 genre=genre,
                 settings=settings,
             )
+            temp_res = call_gemini(
+                prompt=is_target_prompt,
+                settings=settings,
+                schema={
+                    "type": "object",
+                    "properties": {
+                        "isTargetGenre": {"type": "boolean"},
+                        "reason": {"type": "string"},
+                    },
+                    "required": ["isTargetGenre", "reason"]
+                },
+            )
+
+            is_target = temp_res.get("isTargetGenre", False)
+            reason = temp_res.get("reason", "")
+
+
 
             if not is_target:
-                logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article_url}")
+                logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article_url} 理由:{reason}")
                 append_researched_urls([article_url],settings)
                 continue
 
@@ -190,7 +185,7 @@ def run_pipeline(settings: dict):
             # 4 ターゲットジャンルだったので情報を詳しく取得
             # ---------------------------------------------------------
             unique_id = article_url.split("/")[-1].split(".")[0]
-            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:10]}... URL:{article_url} ===")
+            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:10]}... URL:{article_url} ,理由:{reason} ")
             threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
 
             # ---------------------------------------------------------
@@ -259,16 +254,16 @@ def run_pipeline(settings: dict):
             max_thread_length = settings.get("MAX_THREAD_LENGTH", 1000)
 
             if is_too_long(threads, max_thread_length, source, logger):
-                logger.warning(f"最大文字数を超えるコメントがありました、スキップします。: {title[:20]},URL:{article_url}")
+                logger.warning(f"最大文字数を超えるコメントがありました、スキップします。: {title[:20]} ,URL:{article_url}")
                 continue
 
             # ---------------------------------------------------------
             # 6 サムネイルの生成
             # ---------------------------------------------------------
             is_thumbnail,thumbnail_pattern,player_info = make_thumbnail(title, threads, unique_id,settings,drive_service)
-            logger.warning(f"サムネイルの生成に成功しました。タイトル:{title[:20]},URL:{article_url},pataern:{thumbnail_pattern},player:{player_info['name']}")
+            logger.info(f"サムネイルの生成に成功しました。タイトル:{title[:20]} ,URL:{article_url} ,pataern:{thumbnail_pattern} ,player:{player_info['name']}")
             if not is_thumbnail:
-                logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title},URL:{article_url}")
+                logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title} ,URL:{article_url}")
                 continue
 
             # ---------------------------------------------------------

@@ -41,4 +41,5 @@ def call_gemini(prompt: str, settings: dict, schema: dict = None, temperature: f
     data = res.json()
     # Geminiの返答からJSONをパース
     text = data["candidates"][0]["content"]["parts"][0]["text"]
+    print(text)
     return json.loads(text)
