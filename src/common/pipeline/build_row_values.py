@@ -48,7 +48,13 @@ def build_row_values(
     default_text2_setting = settings["DEFAULT_TEXT2_SETTING"]
 
     gif_image_setting = settings["GIF_IMAGE_SETTING"]
-    bgm_map = settings["BGM_MAP"]
+    tem_bgm_map = settings["BGM_MAP"]
+    bgm_map = {}
+    for r in tem_bgm_map:
+        for key, value in r.items():
+            bgm_map[key] = value
+
+
 
     # ============================================================
     #  2. テキスト整形（クリーニング関数）

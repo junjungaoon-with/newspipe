@@ -107,7 +107,7 @@ def load_settings(channel_name: str) -> dict:
         "DEFAULT_TEXT2_SETTING": raw.get("default_text2_setting", ""),
 
         "GIF_IMAGE_SETTING": raw.get("gif_image_setting", ""),
-        "BGM_MAP": raw.get("bgm_map", {})[0],
+        "BGM_MAP": raw.get("bgm_map", {}),
 
         #指示書分split設定
         "SPLIT_MAX_LEN": raw.get("split_max_len", 60),
