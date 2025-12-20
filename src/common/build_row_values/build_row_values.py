@@ -300,6 +300,7 @@ def judge_emotion_from_text(text):
         "text-classification",
         model="Mizuiro-sakura/luke-japanese-large-sentiment-analysis-wrime",
         top_k=1,
+        device=0 if torch.cuda.is_available() else -1,
     )
 
     # ラベルマッピング
