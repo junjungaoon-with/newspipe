@@ -24,3 +24,16 @@ def process_raw_threads_from_long_gif_info(raw_threads:list[str], only_long_gif_
 
     raw_threads = result
     return raw_threads
+
+def is_too_long(threads: list[str], max_length: int, source:dict, logger) -> None:
+    # 各コメントが長すぎないか判定
+    if source.get("is_thread", True) is False:
+        # スレッド形式でない場合はスキップ(ex.yahooニュース)
+        return False
+
+    for i, thread in enumerate(threads):
+        content_length = len(thread)
+        if content_length > max_length:
+            logger.warning(f"Thread {i}/{len(threads)} is too long ({content_length} characters).")
+            return True
+    return False

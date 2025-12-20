@@ -21,7 +21,7 @@ from src.common.sheets.repository import append_table,get_sheet,get_researched_u
 from src.common.sheets.maintenance import delete_over_max_rows
 from config.settings import load_settings
 from src.common.gemini.build_prompt import build_summarize_article_prompt, build_summarize_comments_prompt
-
+from src.common.utils.list_utils import is_too_long
 
 def load_judge(settings: dict):
     """
@@ -149,7 +149,7 @@ def run_pipeline(settings: dict):
                 article_url=article_url,
             )
 
-            logger.info(f"{article_url}を精査します。")
+            logger.info(f"{article_url} を精査します。")
 
 
             detail_html = fetch_html(article_url,settings)
@@ -183,17 +183,18 @@ def run_pipeline(settings: dict):
 
             if not is_target:
                 logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article_url}")
+                append_researched_urls([article_url],settings)
                 continue
 
             # ---------------------------------------------------------
-            # 4-1 ターゲットジャンルだったので情報を詳しく取得
+            # 4 ターゲットジャンルだったので情報を詳しく取得
             # ---------------------------------------------------------
             unique_id = article_url.split("/")[-1].split(".")[0]
             logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:10]}... URL:{article_url} ===")
             threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
 
             # ---------------------------------------------------------
-            # 7 指示書に必要な情報を作成
+            # 5-1 指示書に必要な情報を作成
             # ---------------------------------------------------------
             gemini_title_result = call_gemini(
                 build_title_prompt(title, threads),
@@ -211,7 +212,7 @@ def run_pipeline(settings: dict):
             )
 
             # ---------------------------------------------------------
-            # 4-2 スレッド形式でない場合コメントを取得
+            # 5-2 スレッド形式でない場合コメントを取得
             # ---------------------------------------------------------
             if not source["is_thread"]:
                 logger.info(f"=== スレッド形式でない記事のためコメントを取得  {title[:10]}... URL:{article_url} ===")
@@ -219,7 +220,7 @@ def run_pipeline(settings: dict):
                 comments = parse_comments(article_url, parser_name,source, settings)
  
             # ---------------------------------------------------------
-            # 4-2 スレッド形式でない場合、本文とコメントを要約
+            # 5-3 スレッド形式でない場合、本文とコメントを要約
             # ---------------------------------------------------------
             if not source["is_thread"]:
                 logger.info(f"=== スレッド形式でない記事のため本文とコメントを要約  {title[:10]}... URL:{article_url} ===")
@@ -252,18 +253,26 @@ def run_pipeline(settings: dict):
                 #threadsにコメントを追加
                 threads = [*threads["script"], *comments["script"]]
 
+            # ---------------------------------------------------------
+            # 5-4 各コメントが長すぎないか判定
+            # ---------------------------------------------------------
+            max_thread_length = settings.get("MAX_THREAD_LENGTH", 1000)
+
+            if is_too_long(threads, max_thread_length, source, logger):
+                logger.warning(f"最大文字数を超えるコメントがありました、スキップします。: {title[:20]},URL:{article_url}")
+                continue
 
             # ---------------------------------------------------------
-            # 5 サムネイルの生成
+            # 6 サムネイルの生成
             # ---------------------------------------------------------
             is_thumbnail,thumbnail_pattern,player_info = make_thumbnail(title, threads, unique_id,settings,drive_service)
-            logger.warning(f"サムネイルの生成に成功しました。タイトル:{title},URL:{article_url},pataern:{thumbnail_pattern},player:{player_info['name']}")
+            logger.warning(f"サムネイルの生成に成功しました。タイトル:{title[:20]},URL:{article_url},pataern:{thumbnail_pattern},player:{player_info['name']}")
             if not is_thumbnail:
                 logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title},URL:{article_url}")
                 continue
 
             # ---------------------------------------------------------
-            # 6 サムネイル以外の画像を取得
+            # 7 サムネイル以外の画像を取得
             # ---------------------------------------------------------
             num_media = len(list(dict.fromkeys(pictures)))
             if player_info["name"] != None and num_media <= settings["MIN_REQUIRED_PICTURES"]:
@@ -278,7 +287,7 @@ def run_pipeline(settings: dict):
 
 
             # ---------------------------------------------------------
-            # 7 指示書を作成
+            # 8 指示書を作成
             # ---------------------------------------------------------
             values_out = build_row_values(
                 new_title=gemini_title_result.get("title"),
@@ -299,7 +308,7 @@ def run_pipeline(settings: dict):
                 logger.warning(f"Missing files for article '{title}': {missing_files}. Skipping article.")
                 continue
             # ---------------------------------------------------------
-            # 8 指示書を出力
+            # 9 指示書を出力
             # ---------------------------------------------------------
             output_sheet = get_sheet(settings["SHEET_ARTICLE"],settings)
             log_sheet = get_sheet(settings["SHEET_LOG"],settings)
