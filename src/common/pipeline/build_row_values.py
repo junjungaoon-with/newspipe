@@ -97,7 +97,7 @@ def build_row_values(
     # ============================================================
     #  6. 動画素材・SE・話者設定など
     # ============================================================
-    video_materials = build_video_materials(count)
+    video_materials = build_video_materials(count, settings["VIDEO_MATERIAL_COLUMN_SETTING"])
     talksetting = build_talksetting(count)
     se_row = build_se_row(image_files, talksetting)
     se_initial_row = build_se_initial(se_row)

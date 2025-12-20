@@ -66,15 +66,15 @@ def build_image_files2(unique_id, count, article_elements_counts,pictures):
 
     return arr
 
-def build_video_materials(count):
+def build_video_materials(count,video_material_column_setting):
     arr = []
     if count >= 1:
         arr.append("テンプレ1.mp4")
     if count >= 2:
-        arr.append("野球場上空.mp4")
+        arr.append(video_material_column_setting)
     if count >= 3:
         for i in range(3, count + 1):
-            arr.append("野球場上空.mp4")
+            arr.append(video_material_column_setting)
     return arr
 
 

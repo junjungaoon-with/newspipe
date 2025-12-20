@@ -113,6 +113,9 @@ def load_settings(channel_name: str) -> dict:
         #指示書生成設定
         "MAX_THREAD_LENGTH": raw.get("max_thread_length", 1000),
 
+        #動画素材の列に何を入れるか
+        "VIDEO_MATERIAL_COLUMN_SETTING": raw.get("video_material_column_setting",""),
+
 
         #指示書分split設定
         "SPLIT_MAX_LEN": raw.get("split_max_len", 60),

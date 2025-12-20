@@ -35,6 +35,9 @@ closing_message: |
   野球の最新情報を毎日いち早くお届けしています
   チャンネル登録してもらえるとうれしいです！
 
+#動画素材
+video_material_column_setting: "野球場上空.mp4"
+
 #最低必要画像枚数（この枚数あればOK）
 min_required_pictures: 2
 
