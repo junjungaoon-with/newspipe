@@ -65,7 +65,7 @@ def load_settings(channel_name: str) -> dict:
         "SHEET_SCANNED": raw.get("sheet_scanned", "APP_走査済みURL"),
 
         #スプレッドシート設定
-        "MAINTENANCE_SHEETS": raw.get("maintenance_sheets"),
+        "MAINTENANCE_SHEETS": raw.get("maintenance_sheets",["APP_指示書","指示書ログ"]),
         "MAX_ROWS": raw.get("max_rows"),
 
         #Google_Drive

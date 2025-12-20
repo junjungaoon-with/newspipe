@@ -31,9 +31,9 @@ def main():
             except Exception as e:
                 print(f"Pipeline crashed: {e}")
                 logger.exception("Pipeline crashed")
-                sleep(300)
+                sleep(60)
                 pass
-        sleep(600)
+        sleep(60)
         
 
 if __name__ == "__main__":
