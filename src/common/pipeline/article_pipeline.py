@@ -161,6 +161,7 @@ def run_pipeline(settings: dict):
             temp_res = call_gemini(
                 prompt=is_target_prompt,
                 settings=settings,
+                logger=logger,
                 schema={
                     "type": "object",
                     "properties": {
