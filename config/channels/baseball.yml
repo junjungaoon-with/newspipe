@@ -56,10 +56,14 @@ default_text2_setting: "題目テロップ_黄色"
 gif_image_setting: "GIFそのまま張り付け、読み上げなし"
 
 bgm_map:
-  neutral: "bgm_normal.mp3"
-  angry: "bgm_angry.mp3"
-  sad: "bgm_sad.mp3"
-  happy: "bgm_happy.mp3"
+  "喜び": "喜び①BGM20251208.mp3"
+  "悲しみ": "カエルのピアノ.mp3"
+  "期待": "喜び①BGM20251208.mp3"
+  "驚き": "喜び①BGM20251208.mp3"
+  "怒り": "怒り①BGM1209.mp3"
+  "恐れ": "怒り①BGM1209.mp3"
+  "嫌悪": "怒り①BGM1209.mp3"
+  "信頼": "カエルのピアノ.mp3"
 
 
 #指示書分split設定

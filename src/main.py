@@ -13,7 +13,7 @@ def main():
     # ここでチャンネルを指定！
     while True:
         channel_list = ["politics",
-                        # "baseball",
+                        "baseball",
                         ]
         for channel in channel_list:
             settings = load_settings(channel)

@@ -50,9 +50,8 @@ def build_row_values(
     gif_image_setting = settings["GIF_IMAGE_SETTING"]
     tem_bgm_map = settings["BGM_MAP"]
     bgm_map = {}
-    for r in tem_bgm_map:
-        for key, value in r.items():
-            bgm_map[key] = value
+    for key, value in tem_bgm_map.items():
+        bgm_map[key] = value
 
 
 
