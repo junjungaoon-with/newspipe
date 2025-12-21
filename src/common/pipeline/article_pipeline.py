@@ -195,6 +195,7 @@ def run_pipeline(settings: dict):
             gemini_title_result = call_gemini(
                 build_title_prompt(title, threads),
                 settings,
+                logger,
                 schema={
                     "type": "object",
                     "properties": {
@@ -229,6 +230,7 @@ def run_pipeline(settings: dict):
                 threads = call_gemini(
                     prompt=article_prompt,
                     settings=settings,
+                    logger=logger,
                     schema={"type": "object", "properties": {"script": {"type": "array", "items": {"type": "string"}}}},
                     temperature=0.5
                 )
@@ -243,6 +245,7 @@ def run_pipeline(settings: dict):
                 comments = call_gemini(
                     prompt=comments_prompt,
                     settings=settings,
+                    logger=logger,
                     schema={"type": "object", "properties": {"script": {"type": "array", "items": {"type": "string"}}}},
                     temperature=0.5
                 )

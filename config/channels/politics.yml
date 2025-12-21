@@ -41,9 +41,9 @@ video_material_column_setting: "夜の風景20251220.mp4"
 min_required_pictures: 2
 
 thumbnail_patterns:
-  1: "静止画、640、中央上"
-  2: "静止画、中央上、そのまま張り付け"
-  3: "静止画、1920、中央上"
+  "single": "静止画、640、中央上"
+  "double": "静止画、中央上、そのまま張り付け"
+  "single_wide": "静止画、1920、中央上"
 
 text2_patterns:
   - "サムネ用、白い長方形、青文字"

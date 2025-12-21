@@ -72,6 +72,7 @@ def detect_players(title: str, script_text: str, settings: dict) -> list[dict] |
 """
     res = call_gemini(prompt,
                       settings,
+                      logger=logger,
                       schema={
                           "type": "object",
                           "properties": {
