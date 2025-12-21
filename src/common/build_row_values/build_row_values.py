@@ -253,7 +253,10 @@ def split_row_values(row_values,settings):
         for r in range(len(row_values)):
             try:
 
-                if r == TEXT1_ROW:
+                if r == START_ROW:
+                    pass
+
+                elif r == TEXT1_ROW:
                     new_rows[r].extend(splited)
 
                 elif r == TALK_CONTENT_ROW:

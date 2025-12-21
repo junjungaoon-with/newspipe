@@ -4,22 +4,10 @@ Google Sheets 認証処理（ServiceAccount）。
 
 from pathlib import Path
 from typing import Any
+import os
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-
-
-
-def _detect_credentials_file(settings: dict) -> Path:
-    """
-    credentials/*.json から最初に見つかったものを返す。
-    """
-    CREDENTIALS_DIR = settings["JSON_PATH"]
-    json_files = list(CREDENTIALS_DIR.glob("*.json"))
-    if not json_files:
-        raise FileNotFoundError("No credentials JSON found in /credentials")
-    return json_files[0]
-
 
 def get_sheet(sheet_name: str, settings: dict) -> Any:
     """
@@ -32,7 +20,7 @@ def get_sheet(sheet_name: str, settings: dict) -> Any:
         Worksheet: gspread ワークシートオブジェクト
     """
     SPREADSHEET_ID = settings["SPREADSHEET_ID"]
-    creds_file = _detect_credentials_file(settings)
+    creds_file = os.path.join(settings["JSON_PATH"], "credentials.json")
 
     creds = ServiceAccountCredentials.from_json_keyfile_name(
         creds_file,
