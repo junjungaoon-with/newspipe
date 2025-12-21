@@ -12,7 +12,8 @@ def main():
 
     # ここでチャンネルを指定！
     while True:
-        channel_list = ["politics",
+        channel_list = ["soccer",
+                        "politics",
                         "baseball",
                         ]
         for channel in channel_list:
