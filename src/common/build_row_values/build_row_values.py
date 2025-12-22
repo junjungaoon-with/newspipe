@@ -252,7 +252,6 @@ def split_row_values(row_values,settings):
 
         for r in range(len(row_values)):
             try:
-
                 if r == START_ROW:
                     pass
 

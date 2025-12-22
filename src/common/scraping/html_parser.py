@@ -24,7 +24,7 @@ def parse_article_list(html: str, parser_name: str) -> list[dict]:
     return article_urls
 
 
-def parse_article_simple_info(html: str, parser_name: str) -> dict:
+def parse_article_simple_info(html: str, parser_name: str, logger) -> dict:
     """
     記事詳細ページからタイトル、本文、コメント、ジャンルを抽出する。
     サイト構造に依存するため、個別のパーサーを呼び出す。
@@ -44,7 +44,7 @@ def parse_article_simple_info(html: str, parser_name: str) -> dict:
 
     module_path = f"src.common.scraping.parsers.sites.{parser_name}"
     module = importlib.import_module(module_path)
-    article_info = module.extract_simple_info_from_html(html)
+    article_info = module.extract_simple_info_from_html(html,logger)
 
 
     return article_info

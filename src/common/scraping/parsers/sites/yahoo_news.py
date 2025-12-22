@@ -30,7 +30,7 @@ def parse_articles_from_top_page(top_page_html: str)->list[dict]:
 
 
 
-def extract_simple_info_from_html(html: str) -> dict:
+def extract_simple_info_from_html(html: str,logger) -> dict:
     """
     HTML内からターゲットジャンルかを判断するための情報を抽出してdictで返す関数。
 
@@ -56,9 +56,11 @@ def extract_simple_info_from_html(html: str) -> dict:
     #[url,comments,title,Genre]のリストを作成
     for article_outer_element in soup.find_all("div", id="contentsWrap"):
 
-
-        num_comments = article_outer_element.find("span",class_ = "sc-1n9vtw0-3").get_text()
-
+        try:
+            num_comments = article_outer_element.find("span",class_ = "sc-1n9w0-3").get_text()
+        except:
+            logger.info("コメント数を取得できませんでした。0件として処理します。")
+            num_comments = 0
         title = article_outer_element.find("h1",class_ = "sc-uzx6gd-1 lljVgU").get_text()
 
         genre = "unknown"

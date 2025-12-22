@@ -130,11 +130,12 @@ def run_pipeline(settings: dict):
 
 
             detail_html = fetch_html(article_url,settings)
-            simple_info = parse_article_simple_info(detail_html,parser_name)
+            simple_info = parse_article_simple_info(detail_html,parser_name,logger)
 
             title = simple_info["title"]
             comments = simple_info["comments"]
             genre = simple_info["genre"]
+
 
             """simple_info =dict{
             "title": 記事タイトル,

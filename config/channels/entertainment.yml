@@ -1,0 +1,81 @@
+#チャンネル別変更必須設定
+source_urls:
+  - url: "https://news.yahoo.co.jp/categories/entertainment"
+    parser_name: yahoo_news
+    title_add_word: "【芸能速報】"
+    is_thread: false
+    comment_add_url_word: "comments" #コメントURLに飛ぶために記事URLに追加する文字列
+    summarize_max_title_len: 80  #タイトル要約時の最大文字数
+    summarize_max_title_comment: 200  #コメント要約時の最大文字数
+  - url: "http://blog.livedoor.jp/nanjstu/"
+    parser_name: nanjmatome
+    title_add_word: "【なんj】"
+    is_thread: true
+  - url: "https://livejupiter2.blog.jp/"
+    parser_name: 5ch
+    title_add_word: "【2ch・5ch】"
+    is_thread: true
+enabled: true
+
+genre: "芸能"
+
+extra_word: "芸能"
+
+closing_message: |
+  ご視聴ありがとうございました！
+  芸能の最新情報を毎日いち早くお届けしています
+  チャンネル登録してもらえるとうれしいです！
+
+#動画素材
+video_material_column_setting: "野球場上空.mp4"
+
+
+
+
+maintenance_sheets:
+  - "APP_走査済みURL"
+  - "指示書ログ"
+
+max_rows: 3000 #スプシの上限行数
+
+#最低必要画像枚数（この枚数あればOK）
+min_required_pictures: 2
+
+thumbnail_patterns:
+  "single": "静止画、640、中央上"
+  "double": "静止画、中央上、そのまま張り付け"
+  "single_wide": "静止画、1920、中央上"
+
+text2_patterns:
+  - "サムネ用、白い長方形、青文字"
+  - "サムネ用、白い長方形、赤文字"
+text2_disable_probability: 0.2   # 20%の確率で text2 を削除
+
+default_text2_setting: "題目テロップ_黄色"
+
+gif_image_setting: "GIFそのまま張り付け、読み上げなし"
+
+bgm_map:
+  "喜び": "喜び①BGM20251208.mp3"
+  "悲しみ": "カエルのピアノ.mp3"
+  "期待": "喜び①BGM20251208.mp3"
+  "驚き": "喜び①BGM20251208.mp3"
+  "怒り": "怒り①BGM1209.mp3"
+  "恐れ": "怒り①BGM1209.mp3"
+  "嫌悪": "怒り①BGM1209.mp3"
+  "信頼": "カエルのピアノ.mp3"
+
+
+#指示書分split設定
+
+split_max_len: 60
+split_range_start: 25
+split_range_end: 60
+split_kugiri:
+  - "。"
+  - "、"
+  - "」"
+
+
+
+
