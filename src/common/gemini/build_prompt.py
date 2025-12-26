@@ -3,13 +3,14 @@ def judge_target_prompt(title: str, comments: str, genre: str , settings: dict,)
 
     prompt = f"""
 以下は記事の情報です。判定してください。
+reasonを出力する際は日本語で返答してください。
 
 # 判定条件
 (2) {settings["GENRE"]}関連か（タイトル、ジャンル、スレッドのコメントから判断してください。）
 
 # 出力形式(JSONのみ)
 {{
-"isTargetGenre": boolean,
+"is_{settings["IS_TAGET_GENRE_WORD"]}": boolean,
 "reason": string
 }}
 

@@ -166,14 +166,14 @@ def run_pipeline(settings: dict):
                 schema={
                     "type": "object",
                     "properties": {
-                        "isTargetGenre": {"type": "boolean"},
+                        f"is_{settings['IS_TAGET_GENRE_WORD']}": {"type": "boolean"},
                         "reason": {"type": "string"},
                     },
-                    "required": ["isTargetGenre", "reason"]
+                    "required": [f"is_{settings['IS_TAGET_GENRE_WORD']}", "reason"]
                 },
             )
 
-            is_target = temp_res.get("isTargetGenre", False)
+            is_target = temp_res.get(f"is_{settings['GENRE']}", False)
             reason = temp_res.get("reason", "")
 
 

@@ -53,6 +53,7 @@ def load_settings(channel_name: str) -> dict:
         "SOURCE_URLS": raw.get("source_urls", []),
         "GEMINI_API_KEY": channel_env.get("GEMINI_API_KEY"),
 
+
         #画像保存フォルダ
         "SAVE_DIR": BASE_DIR / "data" / channel_name / "images",
 
@@ -127,6 +128,8 @@ def load_settings(channel_name: str) -> dict:
         # gemini内部固定値
         "GEMINI_MODEL": "gemini-2.5-flash-lite",
         "MAX_GEMINI_TOKENS": 1024,
+
+        "IS_TAGET_GENRE_WORD" : raw.get("is_taget_genre_word", channel_name),
 
         #log
         "LOG_DIR" : BASE_DIR / "logs" / channel_name,
