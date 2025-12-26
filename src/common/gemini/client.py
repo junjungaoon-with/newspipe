@@ -31,7 +31,6 @@ def call_gemini(prompt: str, settings: dict, logger, schema: dict = None, temper
     if schema:
         payload["generationConfig"]["responseSchema"] = schema
     res = requests.post(url, json=payload, timeout=60)
-    logger.info(f"Gemini response status: {res.status_code}, response text: {res.text}")
     res.raise_for_status()
 
     data = res.json()

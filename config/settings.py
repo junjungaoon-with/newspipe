@@ -63,6 +63,7 @@ def load_settings(channel_name: str) -> dict:
         "SHEET_ARTICLE": raw.get("sheet_article", "APP_指示書"),
         "SHEET_LOG": raw.get("sheet_log", "指示書ログ"),
         "SHEET_SCANNED": raw.get("sheet_scanned", "APP_走査済みURL"),
+        "LOG_SHEET": raw.get("LOG_SHEET", "実行データ保存"),
 
         #スプレッドシート設定
         "MAINTENANCE_SHEETS": raw.get("maintenance_sheets",["APP_指示書","指示書ログ"]),

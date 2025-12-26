@@ -25,7 +25,7 @@ def parse_articles_from_top_page(top_page_html: str)->list[dict]:
 
 
 
-def extract_simple_info_from_html(html: str) -> dict:
+def extract_simple_info_from_html(html: str,logger) -> dict:
     """
     HTML内からターゲットジャンルかを判断するための情報を抽出してdictで返す関数。
 
