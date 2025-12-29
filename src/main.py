@@ -14,7 +14,7 @@ def main():
     while True:
         channel_list = [
                         "entertainment",
-                        "InformationTechnology",
+                        "IT",
                         "baseball",
                         "politics",
                         "basketball",

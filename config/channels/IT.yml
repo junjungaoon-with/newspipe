@@ -17,9 +17,9 @@ source_urls:
     is_thread: true
 enabled: true
 
-genre: "InformationTechnology"
+genre: "IT"
 
-extra_word: "InformationTechnology"
+extra_word: "IT"
 
 closing_message: |
   ご視聴ありがとうございました！

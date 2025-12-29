@@ -19,8 +19,6 @@ enabled: true
 genre: "野球"
 
 maintenance_sheets:
-  - "APP_記事内容"
-  - "APP_記事概要"
   - "APP_走査済みURL"
   - "指示書ログ"
 

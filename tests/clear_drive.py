@@ -86,7 +86,7 @@ if __name__ == "__main__":
     channel_list = [
                     "baseball",
                     "basketball",
-                    "InformationTechnology",
+                    "IT",
                     "entertainment",
                     "soccer",
                     "politics",
