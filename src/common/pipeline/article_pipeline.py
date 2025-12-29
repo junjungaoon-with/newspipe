@@ -12,7 +12,7 @@ from src.common.scraping.html_parser import parse_article_list, parse_article_si
 from src.common.utils.logger import get_logger
 from src.common.google_drive.drive_client import get_drive_service
 from src.common.google_drive.drive_utils import verify_drive_images_exist
-from src.common.thumbnail.make_thumbnails import make_thumbnail
+from common.pipeline.thumbnails_pipeline import make_thumbnail
 from src.common.pipeline.image_pipeline import fetch_and_upload_main_images
 from src.common.pipeline.build_row_values import build_row_values
 from src.common.gemini.client import call_gemini
@@ -135,6 +135,7 @@ def run_pipeline(settings: dict):
             title = simple_info["title"]
             comments = simple_info["comments"]
             genre = simple_info["genre"]
+            num_comments = int(simple_info["num_comments"])
 
 
             """simple_info =dict{
@@ -144,7 +145,14 @@ def run_pipeline(settings: dict):
             "genre":ジャンル}"""
 
             # ---------------------------------------------------------
-            # 3 チャンネルのターゲットジャンル記事か判定(ex.野球かどうか？
+            # 3-1 スレッド形式でない場合、コメント数を確認
+            # --------------------------------------------------------- 
+            if num_comments <= 5 and not source["is_thread"]:
+                #コメント数ではじく場合はリサーチ済みに入れずにコメント数が増えるまで待つ
+                logger.info(f"スレッド形式でなくコメントが少ないためいったんスキップします。タイトル:{title},URL:{article_url} ")
+                continue
+            # ---------------------------------------------------------
+            # 3-2 チャンネルのターゲットジャンル記事か判定(ex.野球かどうか？
             # ---------------------------------------------------------
             if any( i is None for i in (title,comments,genre) ):
                 logger.warning(f"記事情報の取得に失敗しました。タイトル:{title},URL:{article_url}")
@@ -183,8 +191,11 @@ def run_pipeline(settings: dict):
                 append_researched_urls([article_url],settings)
                 continue
 
+
+
+
             # ---------------------------------------------------------
-            # 4 ターゲットジャンルだったので情報を詳しく取得
+            # 4 要件を満たしたので情報を詳しく取得
             # ---------------------------------------------------------
             unique_id = article_url.split("/")[-1].split(".")[0]
             logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:10]}... URL:{article_url} ,理由:{reason} ")
@@ -266,7 +277,7 @@ def run_pipeline(settings: dict):
             # 6 サムネイルの生成
             # ---------------------------------------------------------
             is_thumbnail,thumbnail_pattern,player_info = make_thumbnail(title, threads, unique_id,settings,drive_service)
-            logger.info(f"サムネイルの生成に成功しました。タイトル:{title[:20]} ,URL:{article_url} ,pataern:{thumbnail_pattern} ,player:{player_info['name']}")
+            logger.info(f"サムネイルの生成に成功しました。タイトル:{title[:20]} ,URL:{article_url} ,pattern:{thumbnail_pattern} ,player:{player_info['name']}")
             if not is_thumbnail:
                 logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title} ,URL:{article_url}")
                 continue

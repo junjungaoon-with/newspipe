@@ -1,20 +1,13 @@
 #チャンネル別変更必須設定
 source_urls:
-  - url: "https://news.yahoo.co.jp/categories/sports"
-    parser_name: yahoo_news
+  - url: "https://news.yahoo.co.jp/search?p=%E3%83%90%E3%82%B9%E3%82%B1&ei=utf-8&categories=sports"
+    parser_name: yahoo_news_with_query
     title_add_word: "【バスケ速報】"
     is_thread: false
     comment_add_url_word: "comments" #コメントURLに飛ぶために記事URLに追加する文字列
     summarize_max_title_len: 80  #タイトル要約時の最大文字数
-    summarize_max_title_comment: 200  #コメント要約時の最大文字数
-  - url: "http://blog.livedoor.jp/nanjstu/"
-    parser_name: nanjmatome
-    title_add_word: "【なんj】"
-    is_thread: true
-  - url: "https://livejupiter2.blog.jp/"
-    parser_name: 5ch
-    title_add_word: "【2ch・5ch】"
-    is_thread: true
+    summarize_max_title_comment: 250  #コメント要約時の最大文字数(コメントが少ないことが予想される場合、250文字にする)
+
 enabled: true
 
 genre: "basketball"
