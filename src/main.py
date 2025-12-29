@@ -13,11 +13,11 @@ def main():
     # ここでチャンネルを指定！
     while True:
         channel_list = [
+                        "entertainment",
+                        "InformationTechnology",
                         "baseball",
                         "politics",
-                        "InformationTechnology",
                         "basketball",
-                        "entertainment",
                         "soccer",
                         ]
         for channel in channel_list:

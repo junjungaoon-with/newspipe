@@ -129,7 +129,7 @@ def load_settings(channel_name: str) -> dict:
         "GEMINI_MODEL": "gemini-2.5-flash-lite",
         "MAX_GEMINI_TOKENS": 1024,
 
-        "IS_TAGET_GENRE_WORD" : raw.get("is_taget_genre_word", channel_name),
+        "IS_TARGET_GENRE_WORD" : raw.get("IS_TARGET_GENRE_WORD", channel_name),
 
         #log
         "LOG_DIR" : BASE_DIR / "logs" / channel_name,

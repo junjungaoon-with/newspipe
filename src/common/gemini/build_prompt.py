@@ -1,16 +1,20 @@
-def judge_target_prompt(title: str, comments: str, genre: str , settings: dict,) -> bool:
+def judge_target_prompt(title: str, comments: str, genre: str , settings: dict,) -> str:
 
 
     prompt = f"""
 以下は記事の情報です。判定してください。
 reasonを出力する際は日本語で返答してください。
-
+reason には「{settings["GENRE"]}かどうか」の根拠を説明してください。
+否定の場合も「{settings["GENRE"]}ではない理由」を説明してください。
+"is_{settings["IS_TARGET_GENRE_WORD"]}_article" は
+・{settings["GENRE"]}に関する記事の場合 true
+・それ以外の場合 false
 # 判定条件
-(2) {settings["GENRE"]}関連か（タイトル、ジャンル、スレッドのコメントから判断してください。）
+(2) このニュースは「{settings["GENRE"]}」に関する内容ですか？（タイトル、ジャンル、スレッドのコメントから判断してください。）
 
 # 出力形式(JSONのみ)
 {{
-"is_{settings["IS_TAGET_GENRE_WORD"]}": boolean,
+"is_{settings["IS_TARGET_GENRE_WORD"]}_article": boolean,
 "reason": string
 }}
 

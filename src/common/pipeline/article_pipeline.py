@@ -174,14 +174,14 @@ def run_pipeline(settings: dict):
                 schema={
                     "type": "object",
                     "properties": {
-                        f"is_{settings['IS_TAGET_GENRE_WORD']}": {"type": "boolean"},
+                        f"is_{settings['IS_TARGET_GENRE_WORD']}_article": {"type": "boolean"},
                         "reason": {"type": "string"},
                     },
-                    "required": [f"is_{settings['IS_TAGET_GENRE_WORD']}", "reason"]
+                    "required": [f"is_{settings['IS_TARGET_GENRE_WORD']}_article", "reason"]
                 },
             )
 
-            is_target = temp_res.get(f"is_{settings['GENRE']}", False)
+            is_target = temp_res.get(f"is_{settings['IS_TARGET_GENRE_WORD']}_article", False)
             reason = temp_res.get("reason", "")
 
 
@@ -198,7 +198,7 @@ def run_pipeline(settings: dict):
             # 4 要件を満たしたので情報を詳しく取得
             # ---------------------------------------------------------
             unique_id = article_url.split("/")[-1].split(".")[0]
-            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:10]}... URL:{article_url} ,理由:{reason} ")
+            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article_url} ,理由:{reason} ")
             threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
 
             # ---------------------------------------------------------
@@ -224,7 +224,7 @@ def run_pipeline(settings: dict):
             # 5-2 スレッド形式でない場合コメントを取得
             # ---------------------------------------------------------
             if not source["is_thread"]:
-                logger.info(f"=== スレッド形式でない記事のためコメントを取得  {title[:10]}... URL:{article_url} ===")
+                logger.info(f"=== スレッド形式でない記事のためコメントを取得  {title[:20]}... URL:{article_url} ===")
                 #コメント部分を取得
                 comments = parse_comments(article_url, parser_name,source, settings)
  
@@ -232,7 +232,7 @@ def run_pipeline(settings: dict):
             # 5-3 スレッド形式でない場合、本文とコメントを要約
             # ---------------------------------------------------------
             if not source["is_thread"]:
-                logger.info(f"=== スレッド形式でない記事のため本文とコメントを要約  {title[:10]}... URL:{article_url} ===")
+                logger.info(f"=== スレッド形式でない記事のため本文とコメントを要約  {title[:20]}... URL:{article_url} ===")
                 article_prompt = build_summarize_article_prompt(
                     article=threads,
                     title=title,
