@@ -1,8 +1,7 @@
-#チャンネル別変更必須設定
 source_urls:
-  - url: "https://news.yahoo.co.jp/categories/entertainment"
+  - url: "https://news.yahoo.co.jp/search?p=%E3%83%86%E3%83%8B%E3%82%B9&ei=utf-8"
     parser_name: yahoo_news
-    title_add_word: "【芸能速報】"
+    title_add_word: "【テニス速報】"
     is_thread: false
     comment_add_url_word: "comments" #コメントURLに飛ぶために記事URLに追加する文字列
     summarize_max_title_len: 80  #タイトル要約時の最大文字数
@@ -10,26 +9,25 @@ source_urls:
 
 enabled: true
 
-genre: "芸能"
-
-extra_word: "芸能"
-
-closing_message: |
-  ご視聴ありがとうございました！
-  芸能の最新情報を毎日いち早くお届けしています
-  チャンネル登録してもらえるとうれしいです！
-
-#動画素材
-video_material_column_setting: "野球場上空.mp4"
-
-
-
+genre: "テニス"
 
 maintenance_sheets:
   - "APP_走査済みURL"
   - "指示書ログ"
 
 max_rows: 3000 #スプシの上限行数
+
+extra_word: "テニス"
+
+#指示書関連設定
+
+closing_message: |
+  ご視聴ありがとうございました！
+  テニスの最新情報を毎日いち早くお届けしています
+  チャンネル登録してもらえるとうれしいです！
+
+#動画素材
+video_material_column_setting: "野球場上空.mp4"
 
 #最低必要画像枚数（この枚数あればOK）
 min_required_pictures: 2

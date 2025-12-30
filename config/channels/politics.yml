@@ -6,14 +6,7 @@ source_urls:
     comment_add_url_word: "comments" #コメントURLに飛ぶために記事URLに追加する文字列
     summarize_max_title_len: 80  #タイトル要約時の最大文字数
     summarize_max_title_comment: 200  #コメント要約時の最大文字数
-  - url: "http://blog.livedoor.jp/nanjstu/"
-    parser_name: nanjmatome
-    title_add_word: "【なんj】"
-    is_thread: true
-  - url: "https://livejupiter2.blog.jp/"
-    parser_name: 5ch
-    title_add_word: "【2ch・5ch】"
-    is_thread: true
+
 enabled: true
 
 genre: "政治" #is_targetの判断に使う

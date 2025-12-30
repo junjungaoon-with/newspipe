@@ -14,10 +14,14 @@ def main():
     while True:
         channel_list = [
                         "entertainment",
-                        "IT",
                         "baseball",
-                        "politics",
+                        "international_news",
+                        "martial_arts",
+                        "tenis",
+                        "volleyball",
                         "basketball",
+                        "IT",
+                        "politics",
                         "soccer",
                         ]
         for channel in channel_list:

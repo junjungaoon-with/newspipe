@@ -59,12 +59,14 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
     article_outer_element = soup.find("div", id="contentsWrap")
 
     try:
+        a = soup.find_all("span")
         for span in soup.find_all("span"):
             if span.find("svg"):
                 # この span は svg を子に持つ
                 if span.get_text().isdigit():
                     num_comments = int(span.get_text())
-                break
+                    break
+                
 
         else:
             num_comments = 0
@@ -80,7 +82,7 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
     #コメントのリストを作成
     for article_element in soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget"):
         article = article_element.get_text()
-        article_list.append(article)
+        article_list.append(article)#記事本文全体だがほかの記事元と合わせるためこう呼ぶ
 
 
     article_info={
