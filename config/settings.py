@@ -97,7 +97,7 @@ def load_settings(channel_name: str) -> dict:
         "FACE_RATIO_METRIC":max,
 
         #サムネイル以外の画像設定
-        "MAIN_PIC_EXTRA_WORD": f"野球風景 ",
+        "MAIN_PIC_EXTRA_WORD": raw.get("main_pic_extra_word", "試合風景"),
 
         "CLOSING_MESSAGE": raw.get("closing_message", ""),
         "MIN_REQUIRED_PICTURES": raw.get("min_required_pictures", 3),

@@ -18,6 +18,7 @@ maintenance_sheets:
 max_rows: 3000 #スプシの上限行数
 
 extra_word: "政治"
+main_pic_extra_word: "政治"
 
 #指示書関連設定
 

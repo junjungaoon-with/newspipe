@@ -13,6 +13,7 @@ enabled: true
 genre: "サッカー"
 
 extra_word: "サッカー"
+main_pic_extra_word: "サッカー"
 
 closing_message: |
   ご視聴ありがとうございました！

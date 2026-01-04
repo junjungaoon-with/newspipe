@@ -13,16 +13,16 @@ def main():
     # ここでチャンネルを指定！
     while True:
         channel_list = [
-                        "entertainment",
-                        "baseball",
-                        "international_news",
-                        "martial_arts",
-                        "tenis",
-                        "volleyball",
                         "basketball",
-                        "IT",
-                        "politics",
-                        "soccer",
+                        #"baseball",
+                        # "entertainment",
+                        # "international_news",
+                        # "martial_arts",
+                        # "tenis",
+                        # "volleyball",
+                        # "IT",
+                        # "politics",
+                        # "soccer",
                         ]
         for channel in channel_list:
             settings = load_settings(channel)
@@ -40,9 +40,9 @@ def main():
             except Exception as e:
                 print(f"Pipeline crashed: {e}")
                 logger.exception("Pipeline crashed")
-                sleep(60)
+                sleep(180)
                 pass
-        sleep(60)
+        sleep(180)
         
 
 if __name__ == "__main__":

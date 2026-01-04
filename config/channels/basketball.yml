@@ -1,5 +1,10 @@
 #チャンネル別変更必須設定
 source_urls:
+  - url: "https://basketballbbs.com/"
+    parser_name: basketballbbs
+    title_add_word: "【2ch・5ch】"
+    is_thread: true
+    demand_to_check_target_channel: false
   - url: "https://news.yahoo.co.jp/search?p=%E3%83%90%E3%82%B9%E3%82%B1&ei=utf-8&categories=sports"
     parser_name: yahoo_news_with_query
     title_add_word: "【バスケ速報】"
@@ -13,10 +18,11 @@ enabled: true
 genre: "basketball"
 
 extra_word: "バスケ"
+main_pic_extra_word: "バスケ"
 
 closing_message: |
   ご視聴ありがとうございました！
-  バスケの最新情報を毎日いち早くお届けしています
+  の最新情報を毎日いち早くお届けしています
   チャンネル登録してもらえるとうれしいです！
 
 #動画素材

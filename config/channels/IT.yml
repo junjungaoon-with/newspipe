@@ -12,7 +12,8 @@ enabled: true
 
 genre: "IT"
 
-extra_word: "IT"
+extra_word: ""
+main_pic_extra_word: ""
 
 closing_message: |
   ご視聴ありがとうございました！

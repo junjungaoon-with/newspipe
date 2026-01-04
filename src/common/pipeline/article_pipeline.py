@@ -91,6 +91,7 @@ def run_pipeline(settings: dict):
     for source in settings["SOURCE_URLS"]:
         source_url = source["url"]
         parser_name = source["parser_name"]
+        demand_to_check_target_channel = source.get("demand_to_check_target_channel",True)
 
         logger = get_logger(
             channel,
@@ -160,29 +161,34 @@ def run_pipeline(settings: dict):
                 append_researched_urls([article_url],settings)
                 continue
 
+            if demand_to_check_target_channel:
+                is_target_prompt = judge_target_prompt(
+                    title=title,
+                    comments=comments,
+                    genre=genre,
+                    settings=settings,
+                )
 
-            is_target_prompt = judge_target_prompt(
-                title=title,
-                comments=comments,
-                genre=genre,
-                settings=settings,
-            )
-            temp_res = call_gemini(
-                prompt=is_target_prompt,
-                settings=settings,
-                logger=logger,
-                schema={
-                    "type": "object",
-                    "properties": {
-                        f"is_{settings['IS_TARGET_GENRE_WORD']}_article": {"type": "boolean"},
-                        "reason": {"type": "string"},
+                temp_res = call_gemini(
+                    prompt=is_target_prompt,
+                    settings=settings,
+                    logger=logger,
+                    schema={
+                        "type": "object",
+                        "properties": {
+                            f"is_{settings['IS_TARGET_GENRE_WORD']}_article": {"type": "boolean"},
+                            "reason": {"type": "string"},
+                        },
+                        "required": [f"is_{settings['IS_TARGET_GENRE_WORD']}_article", "reason"]
                     },
-                    "required": [f"is_{settings['IS_TARGET_GENRE_WORD']}_article", "reason"]
-                },
-            )
+                )
 
-            is_target = temp_res.get(f"is_{settings['IS_TARGET_GENRE_WORD']}_article", False)
-            reason = temp_res.get("reason", "")
+                is_target = temp_res.get(f"is_{settings['IS_TARGET_GENRE_WORD']}_article", False)
+                reason = temp_res.get("reason", "")
+            
+            else:
+                is_target = True
+                reason = "geminiを通さずにターゲットジャンルと判定"
 
 
 
@@ -197,9 +203,18 @@ def run_pipeline(settings: dict):
             # ---------------------------------------------------------
             # 4 要件を満たしたので情報を詳しく取得
             # ---------------------------------------------------------
-            unique_id = article_url.split("/")[-1].split(".")[0]
-            logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article_url} ,理由:{reason} ")
-            threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
+            try:
+                unique_id = article_url.strip("/").split("/")[-1]
+                if unique_id.split(".")[0] != "":
+                    unique_id = unique_id.split(".")[0]
+
+                logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article_url} ,理由:{reason} ")
+                threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
+
+            except Exception as e:
+                logger.info(f"記事情報取得中にエラーが出ました。タイトル:{title[:20]},URL:{article_url} error:{e}")
+                append_researched_urls([article_url],settings)
+                continue
 
             # ---------------------------------------------------------
             # 5-1 指示書に必要な情報を作成
