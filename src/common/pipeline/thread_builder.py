@@ -56,6 +56,15 @@ def thread_builder(raw_threads :list[str])->tuple[list[str], list[str]]:
         threads.append(raw_threads[1])
         return threads, pictures
     
+    # -------------------------------------------
+    # 画像が一番前に来るとスキップしてしまうので画像の場合は2番目にする
+    # -------------------------------------------
+
+    if is_url(raw_threads[0]):
+        fi = raw_threads[0]
+        sec = raw_threads[1]
+        raw_threads[0] = sec
+        raw_threads[1] = fi
 
     # -------------------------------------------
     # テキストと画像を順に処理

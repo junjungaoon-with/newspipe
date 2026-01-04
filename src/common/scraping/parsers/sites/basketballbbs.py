@@ -20,9 +20,9 @@ def parse_articles_from_top_page(top_page_html: str)->list[dict]:
 
         url = article_outer_element["href"]
 
-        article_urls.append(url)
+        if "page" not in url:
+            article_urls.append(url)
 
-    article_urls = article_urls[:-1]
 
     return article_urls
 
