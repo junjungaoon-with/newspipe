@@ -5,6 +5,7 @@ import torch
 
 from src.common.build_row_values.build_row_values import build_image_files, build_image_files2, build_video_materials, build_talksetting, build_se_row, build_se_initial, build_text_setting, split_row_values, normalize_block_text, normalize_inline_text, judge_emotion_from_text
 from src.common.utils.text_utils import remove_sumikakko
+from src.common.utils.text_utils import generate_random_code
 
 
 def build_row_values(
@@ -137,7 +138,7 @@ def build_row_values(
     endarr = [""] + endarr
 
     row_values = [
-        ["start", ""],
+        ["start", generate_random_code()],
         ["タイトル", new_title],
         ["番号", *numbers],
         ["話す内容", *clean_texts],

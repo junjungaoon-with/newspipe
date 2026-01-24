@@ -1,6 +1,8 @@
 import re
 from pathlib import Path
 from urllib.parse import urlparse,urlunparse
+import random
+import string
 
 def contains_japanese(text: str) -> bool:
     # ひらがな・カタカナ・漢字が含まれているかチェック
@@ -59,3 +61,14 @@ def remove_sumikakko(text: str) -> str:
     result = re.sub(r"【[^】]*】", "", text)
     # 前後の余計な空白を削る
     return result.strip()
+
+def generate_random_code(length: int = 8) -> str:
+    """
+    指定した桁数のランダムな英数字文字列を生成する。
+
+    英字（a-z, A-Z）と数字（0-9）を組み合わせた
+    ランダムな文字列を返す。
+    デフォルトでは8桁の文字列を生成する。
+    """
+    chars = string.ascii_letters + string.digits
+    return "".join(random.choices(chars, k=length))

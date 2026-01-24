@@ -22,7 +22,7 @@ maintenance_sheets:
   - "APP_走査済みURL"
   - "指示書ログ"
 
-max_rows: 3000 #スプシの上限行数
+max_rows: 5000 #スプシの上限行数
 
 extra_word: "野球"
 

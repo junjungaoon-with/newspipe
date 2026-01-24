@@ -1,4 +1,9 @@
 source_urls:
+  - url: "https://smasoku.blog.jp/"
+    parser_name: smasoku
+    title_add_word: "【2ch・5ch】"
+    is_thread: true
+    demand_to_check_target_channel: false
   - url: "https://news.yahoo.co.jp/search?p=%E3%83%86%E3%83%8B%E3%82%B9&ei=utf-8"
     parser_name: yahoo_news
     title_add_word: "【テニス速報】"
