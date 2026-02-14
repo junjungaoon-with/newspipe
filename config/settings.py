@@ -77,7 +77,7 @@ def load_settings(channel_name: str) -> dict:
         "SINGLE_THUMB_EXTRA_WORD": f"{extra_word} 顔写真",
 
         #1枚横長サムネ
-        "SINGLE_WIDE_THUMB_EXTRA_WORD": f"{extra_word}",
+        "SINGLE_WIDE_THUMB_EXTRA_WORD": f"{extra_word} 画像 横長",
         "WIDTH_WIDE_THUMB_RATIO": 11/8,
 
 

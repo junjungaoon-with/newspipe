@@ -78,8 +78,8 @@ def judge_face_fully_in_top_half(image_path: str,) -> str:
 
 
     # ★ここを調整：Haar枠の下側（アゴ・首寄り）をどれだけ「顔扱い」するか
-    FACE_BOTTOM_RATIO = 0.85  # 1.0だと厳密（今回みたいにNGになりやすい）
-
+    FACE_BOTTOM_RATIO = 0.85  # 1.0だと厳密
+    
     pil_img = Image.open(image_path).convert("RGB")
     img = np.array(pil_img)
     H, W = img.shape[0], img.shape[1]

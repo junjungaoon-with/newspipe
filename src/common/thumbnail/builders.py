@@ -1,4 +1,5 @@
 import os
+import random
 
 from src.common.scraping.run_selenium import set_up_selenium ,serch_picture_by_selenium
 from src.common.media.media_utils import save_image
@@ -37,7 +38,7 @@ def build_single_thumbnail( player, settings):
         return False , output_path
     
 
-
+    
 
 def build_double_thumbnail(first_player, second_player, unique_id, settings):    
     file_path_list = []
@@ -63,7 +64,7 @@ def build_wide_thumbnail( player, settings):
     extra_word = settings["SINGLE_WIDE_THUMB_EXTRA_WORD"]
     player_name = player["name"]
     player_team = player["team"]
-    output_path = None
+    output_paths = []
 
     query = f"{player_team} {player_name}  {extra_word} ".strip()
 
@@ -87,8 +88,12 @@ def build_wide_thumbnail( player, settings):
         if not judge_face_fully_in_top_half(file_path):
             continue
 
-        output_path = file_path
+        output_paths.append(file_path)
+
+    if len(output_paths) > 0:
+        output_path = output_paths[random.randint(0, len(output_paths) - 1)]  # ランダムにパスを返す
 
         return True , output_path
     
-    return False , output_path
+    else:
+        return False , None

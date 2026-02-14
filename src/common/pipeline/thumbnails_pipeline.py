@@ -29,26 +29,28 @@ def make_thumbnail(title, script_text, unique_id, settings, drive_service):
     clear_local_folder(settings["SAVE_DIR"])
 
     #選手情報がないときの処理
-    if first["name"] is None:
+    if first["name"] is None or first["name"] == "None":
         logger.warning("サムネイル用の選手情報が取得できませんでした。")
         return False, None, first
 
     # 3. サムネタイプの判定
     pattern = selection_logic(first, second, settings)
+    pattern = "single_wide"#TODO　本番環境適用の際はほかの選択ロジックの処理は削除する。
 
 
     is_complete = False
 
-    if pattern == "double":
-        is_complete,local_path = build_double_thumbnail(first, second, unique_id, settings)
-        if is_complete :
-            pattern = "double"
-
-    elif pattern == "single_wide":
+    if pattern == "single_wide":
         #TODO: どんな種類の写真が通るのか検証
         is_complete,local_path = build_wide_thumbnail(first, settings)
         if is_complete :
             pattern = "single_wide"
+
+    elif pattern == "double":
+        is_complete,local_path = build_double_thumbnail(first, second, unique_id, settings)
+        if is_complete :
+            pattern = "double"
+
 
     if not is_complete:#上二つの処理がうまく行かなかった場合、シングルサムネにする
         is_complete,local_path = build_single_thumbnail(first, settings)
