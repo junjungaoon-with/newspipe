@@ -11,7 +11,7 @@ from src.common.scraping.fetcher import fetch_html
 from src.common.scraping.html_parser import parse_article_list, parse_article_simple_info, parse_article_detail_info, parse_comments
 from src.common.utils.logger import get_logger
 from src.common.google_drive.drive_client import get_drive_service
-from src.common.google_drive.drive_utils import verify_drive_images_exist
+from src.common.google_drive.drive_utils import verify_drive_images_exist,remove_duplicate_names_in_folder
 from common.pipeline.thumbnails_pipeline import make_thumbnail
 from src.common.pipeline.image_pipeline import fetch_and_upload_main_images
 from src.common.pipeline.build_row_values import build_row_values
@@ -85,6 +85,10 @@ def run_pipeline(settings: dict):
     #シートのMAX_DATA_ROWSを超過していたら削除
     delete_over_max_rows(settings)
 
+    #Driveの同名ファイルを削除（重複消去）
+    remove_duplicate_names_in_folder(drive_service,settings["DRIVE_ID"],dry_run=False)
+    
+
     # ---------------------------------------------------------
     # 1 すべての取得元を巡回
     # ---------------------------------------------------------
@@ -132,6 +136,9 @@ def run_pipeline(settings: dict):
 
             detail_html = fetch_html(article_url,settings)
             simple_info = parse_article_simple_info(detail_html,parser_name,logger)
+            if not simple_info:
+                logger.info(f"本文が抽出できませんでした。そういうタイプのヤフーニュースか指定したクラスが変更された可能性があります。タイトル:{title},URL:{article_url} ")
+                continue
 
             title = simple_info["title"]
             comments = simple_info["comments"]
@@ -334,7 +341,7 @@ def run_pipeline(settings: dict):
                 logger.warning(f"Missing files for article '{title}': {missing_files}. Skipping article.")
                 continue
             # ---------------------------------------------------------
-            # 9 指示書を出力
+            # 9 指示書を出力    
             # ---------------------------------------------------------
             output_sheet = get_sheet(settings["SHEET_ARTICLE"],settings)
             log_sheet = get_sheet(settings["SHEET_LOG"],settings)

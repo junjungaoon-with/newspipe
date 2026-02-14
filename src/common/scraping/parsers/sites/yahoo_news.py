@@ -80,6 +80,10 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
     genre = "unknown"
         
     #コメントのリストを作成
+    #存在確認
+    if not soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget"):
+        return None
+        
     for article_element in soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget"):
         article = article_element.get_text()
         article_list.append(article)#記事本文全体だがほかの記事元と合わせるためこう呼ぶ

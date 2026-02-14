@@ -1,5 +1,6 @@
 import os
-
+from collections import defaultdict
+from typing import Literal
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 
@@ -52,3 +53,61 @@ def verify_drive_images_exist(values_out, settings) -> list:
             missing_files.append(name)
 
     return missing_files
+
+
+
+
+
+
+def remove_duplicate_names_in_folder(
+    drive_service,
+    folder_id: str,
+    *,
+    keep: Literal["newest", "oldest"] = "newest",
+    dry_run: bool = True,
+):
+    """
+    指定フォルダ内の同名ファイル／フォルダを検出し、
+    重複分を削除する。
+
+    Parameters
+    ----------
+    drive_service : googleapiclient.discovery.Resource
+    folder_id : str
+        対象フォルダのID
+    keep : "newest" | "oldest"
+        残す基準
+    dry_run : bool
+        True の場合は削除せずログのみ出力
+    """
+
+    query = f"'{folder_id}' in parents and trashed = false"
+    results = drive_service.files().list(
+        q=query,
+        fields="files(id, name, modifiedTime, mimeType)",
+        pageSize=1000,
+    ).execute()
+
+    files = results.get("files", [])
+
+    # name ごとにグルーピング
+    grouped = defaultdict(list)
+    for f in files:
+        grouped[f["name"]].append(f)
+
+    for name, items in grouped.items():
+        if len(items) <= 1:
+            continue  # 重複なし
+
+        # 並び替え
+        items.sort(
+            key=lambda x: x["modifiedTime"],
+            reverse=(keep == "newest"),
+        )
+
+        keep_item = items[0]
+        delete_items = items[1:]
+
+        for f in delete_items:
+            if not dry_run:
+                drive_service.files().delete(fileId=f["id"]).execute()
