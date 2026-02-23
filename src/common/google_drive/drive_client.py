@@ -26,6 +26,8 @@ def get_drive_service(settings) ->any:
     SCOPES = ['https://www.googleapis.com/auth/drive.file']
     creds = None
     token_path = settings["TOKEN_PICKLE_PATH"]
+    secret_path = os.path.join(settings["JSON_PATH"], "client_secret.json")
+
 
     # 保存済みトークンを使う（2回目以降は自動ログイン）
     if os.path.exists(token_path):
@@ -35,10 +37,22 @@ def get_drive_service(settings) ->any:
     # トークンがない場合 → ブラウザで認証
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(os.path.join(settings["JSON_PATH"], "client_secret.json"), SCOPES)
-            creds = flow.run_local_server(port=0)
+            try:
+                creds.refresh(Request())
+            except Exception:
+                # refresh失敗 → 強制再認証
+                creds = None
+
+    if not creds or not creds.valid:
+        flow = InstalledAppFlow.from_client_secrets_file(
+            secret_path,
+            SCOPES
+        )
+        creds = flow.run_local_server(
+            port=0,
+            access_type="offline",
+            prompt="consent"
+        )
         # トークンを保存
         with open(token_path, 'wb') as token:
             pickle.dump(creds, token)

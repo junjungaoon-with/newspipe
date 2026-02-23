@@ -8,25 +8,43 @@ sys.path.append(str(ROOT))
 from config.settings import load_settings
 from src.common.utils.logger import setup_logger
 from src.common.pipeline.article_pipeline import run_pipeline
+from src.common.google_drive.drive_client import get_drive_service
 def main():
+    channel_list = [
+                    "soccer",
+                    "martial_arts",
+                    "IT",
+                    #"volleyball",
+                    #"baseball",
+                    "international_news",
+                    "basketball",
+                    "entertainment",
+                    "tenis",
+                    "politics",
+                    ]
+
+    #API疎通テスト
+    #ループ前に認証のみ通しておく（これもループ内に入れると毎回認証してしまう）
+    for channel in channel_list:
+        settings = load_settings(channel)
+        logger = setup_logger(
+            name="OAuthTest",
+            log_dir=settings["OAUTH_LOG_DIR"],
+        )
+        try:
+            _ = get_drive_service(settings)
+        except Exception as e:
+            print(f"グーグル認証テスト失敗: {e}")
+            logger.exception("グーグル認証テスト失敗")
+            sleep(10)
+            pass
 
     # ここでチャンネルを指定！
     while True:
-        channel_list = [
-                        "soccer",
-                        "martial_arts",
-                        "IT",
-                        #"volleyball",
-                        #"baseball",
-                        "international_news",
-                        "basketball",
-                        "entertainment",
-                        "tenis",
-                        "politics",
-                        ]
         for channel in channel_list:
             settings = load_settings(channel)
             
+
             if not settings["IS_ENABLED"]:
                 continue 
 

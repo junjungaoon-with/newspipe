@@ -133,6 +133,7 @@ def load_settings(channel_name: str) -> dict:
 
         #log
         "LOG_DIR" : BASE_DIR / "logs" / channel_name,
+        "OAUTH_LOG_DIR" : BASE_DIR / "logs" / "OAUTHD",
 
         #認証
 
