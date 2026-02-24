@@ -11,13 +11,13 @@ from src.common.pipeline.article_pipeline import run_pipeline
 from src.common.google_drive.drive_client import get_drive_service
 def main():
     channel_list = [
+                    "baseball",
                     "soccer",
                     "martial_arts",
                     "IT",
                     #"volleyball",
-                    #"baseball",
                     "international_news",
-                    "basketball",
+                    #"basketball",
                     "entertainment",
                     "tenis",
                     "politics",

@@ -137,7 +137,7 @@ def run_pipeline(settings: dict):
             detail_html = fetch_html(article_url,settings)
             simple_info = parse_article_simple_info(detail_html,parser_name,logger)
             if not simple_info:
-                logger.info(f"本文が抽出できませんでした。そういうタイプのヤフーニュースか指定したクラスが変更された可能性があります。タイトル:{title},URL:{article_url} ")
+                logger.info(f"本文が抽出できませんでした。そういうタイプのヤフーニュースか指定したクラスが変更された可能性があります。URL:{article_url} ")
                 continue
 
             title = simple_info["title"]
