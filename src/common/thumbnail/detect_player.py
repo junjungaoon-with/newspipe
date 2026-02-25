@@ -47,7 +47,7 @@ def detect_players(title: str, script_text: str, settings: dict) -> list[dict] |
 
 
     prompt = f"""
-あなたはスポーツ記者です。
+あなたはス記者です。
 以下の動画のタイトルと台本を読み、話題となっている人物を2人まで上げて下さい。
 その人物の「フルネーム」ともし現役選手ならば「所属チーム名」を返してください。
 もし、フルネームが分からなければ苗字だけでも構いません、所属チームが分からなければNoneで返しても構いません。
@@ -100,3 +100,107 @@ def detect_players(title: str, script_text: str, settings: dict) -> list[dict] |
     res= res.get("players", [])
 
     return res
+
+
+
+#人物ではなく話題を抽出する場合の関数。detect_playersと同様の構造。
+def detect_topic(title: str, script_text: str, settings: dict) -> list[dict] | None:
+
+    logger = get_logger(
+        settings["CHANNEL_NAME"],
+        channel=settings["CHANNEL_NAME"],
+        step="detect_topic",
+    )
+
+    """
+    タイトルと台本本文をもとに、Gemini API を利用して
+    動画内で話題となっている人物（最大2名）を推定する関数。
+
+    モデルにはフルネーム・所属チーム・団体（不明なら None）を返すよう指示し、
+    以下の形式の JSON を返すことを期待する：
+
+        {
+          "topics": [
+            {"topic": "話題名"},
+            {"topic": "話題名"}
+          ]
+        }
+
+    モデル出力が取得できない場合は None を返します。
+
+    Args:
+        title (str):
+            動画タイトル。
+
+        script_text (str):
+            動画の台本テキスト全文。
+
+        settings (dict):
+            Gemini API の設定が含まれる辞書。
+            "GEMINI_API_KEY" などを参照します。
+
+    Returns:
+        dict | None:
+            パース済みの JSON データ。
+            例: {"players": [{"name": "...", "team": "..."}, {...}]}
+            エラー時は None。
+    """
+
+
+    prompt = f"""
+あなたは記者です。
+以下の動画のタイトルと台本を読み、話題となっている事柄、概念、国名などを上げて下さい。
+その事柄・概念・人物・国名の「名前」を返してください。
+もし、名前が分からなければ「不明」で返してください。
+また登場する事柄・概念・人物・国名が1つの場合は2つ目は「不明」で返してください。
+台本の中に少ししか出てこない場合は2つ目としてカウントしないでください。
+漢字、ひらがな、カタカナで回答してください。
+
+必ず以下のJSON形式で出力してください：
+{{
+  "topics": [
+    {{ "topic": "名前"}}
+  ]
+}}
+
+---
+タイトル:
+{title}
+
+本文:
+{script_text}
+"""
+    res = call_gemini(prompt,
+                      settings,
+                      logger=logger,
+                      schema={
+                          "type": "object",
+                          "properties": {
+                              "topics": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "topic": {"type": "string"},
+                                      },
+                                      "required": ["topic"]
+                                  }
+                              }
+                          },
+                          "required": ["topics"]
+                      }
+                    )
+
+
+
+    if not res:
+        return None
+
+
+    res= res.get("topics", [])
+    return_res = [
+        {"name": res[0].get("topic", None), "team": None},
+        {"name": res[1].get("topic", None), "team": None},
+    ]
+
+    return return_res

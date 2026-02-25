@@ -12,9 +12,9 @@ from src.common.google_drive.drive_client import get_drive_service
 def main():
     channel_list = [
                     "baseball",
+                    "IT",
                     "soccer",
                     "martial_arts",
-                    "IT",
                     #"volleyball",
                     "international_news",
                     #"basketball",

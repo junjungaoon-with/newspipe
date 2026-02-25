@@ -88,6 +88,7 @@ def load_settings(channel_name: str) -> dict:
 
 
         # 顔検出器設定（Haar Cascade）
+        "IS_HUMAN_ARTICLE": raw.get("is_human_article", True), #そもそも顔認証をするのか。geminiに人物名の抽出をさせるのか？
         "CASCADE_PATH" : cv2.data.haarcascades + "haarcascade_frontalface_default.xml",
         "SCALE_FACTOR" : 1.1,
         "MIN_NEIGHBORS" : 5,

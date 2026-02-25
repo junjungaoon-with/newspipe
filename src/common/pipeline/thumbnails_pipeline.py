@@ -1,6 +1,6 @@
 import random
 
-from src.common.thumbnail.detect_player import detect_players
+from src.common.thumbnail.detect_player import detect_players, detect_topic
 from src.common.thumbnail.preprocess import normalize_players, split_players
 from src.common.thumbnail.selection_logic import selection_logic
 from common.thumbnail.builders import build_single_thumbnail,build_double_thumbnail,build_wide_thumbnail
@@ -17,9 +17,13 @@ def make_thumbnail(title, script_text, unique_id, settings, drive_service):
         channel=settings["CHANNEL_NAME"],
         step="make_thumbnail",
     )
-
+    print(settings["IS_HUMAN_ARTICLE"])
     # 1. 人物検出
-    result = detect_players(title, script_text, settings)
+    if settings["IS_HUMAN_ARTICLE"]:
+        result = detect_players(title, script_text, settings)
+    else:
+        # 人物検出をスキップする場合、空の結果を返す
+        result = detect_topic(title, script_text, settings)
 
     # 2. 前処理
     players = normalize_players(result)
