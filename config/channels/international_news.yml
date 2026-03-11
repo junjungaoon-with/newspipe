@@ -9,6 +9,9 @@ source_urls:
 
 enabled: true
 
+channel_id: ""
+
+
 genre: "国際政治"
 
 maintenance_sheets:

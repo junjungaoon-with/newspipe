@@ -10,6 +10,8 @@ source_urls:
 
 enabled: true
 
+channel_id: ""
+
 genre: "芸能"
 
 extra_word: ""

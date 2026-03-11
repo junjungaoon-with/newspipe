@@ -10,6 +10,8 @@ source_urls:
 
 enabled: true
 
+channel_id: ""
+
 genre: "IT"
 
 extra_word: ""

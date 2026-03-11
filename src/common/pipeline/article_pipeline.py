@@ -6,6 +6,7 @@ import importlib
 from datetime import datetime
 from time import sleep
 import re
+import traceback
 
 from src.common.scraping.fetcher import fetch_html
 from src.common.scraping.html_parser import parse_article_list, parse_article_simple_info, parse_article_detail_info, parse_comments
@@ -219,7 +220,7 @@ def run_pipeline(settings: dict):
                 threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
 
             except Exception as e:
-                logger.info(f"記事情報取得中にエラーが出ました。タイトル:{title[:20]},URL:{article_url} error:{e}")
+                logger.error(f"記事情報取得中にエラーが出ました。タイトル:{title[:20]},URL:{article_url} error:{e}"+traceback.format_exc())
                 append_researched_urls([article_url],settings)
                 continue
 

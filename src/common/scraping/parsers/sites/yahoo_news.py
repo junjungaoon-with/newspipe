@@ -81,10 +81,10 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
         
     #コメントのリストを作成
     #存在確認
-    if not soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget"):
+    if not soup.find("p", class_="sc-54nboa-0"):
         return None
         
-    for article_element in soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget"):
+    for article_element in soup.find("p", class_="sc-54nboa-0"):
         article = article_element.get_text()
         article_list.append(article)#記事本文全体だがほかの記事元と合わせるためこう呼ぶ
 
@@ -129,7 +129,7 @@ def parse_thread_content(url: str, html: str)-> list[str]:
     thumbnail_url = normalize_url(thumbnail_url)
     combined.append(thumbnail_url)
 
-    article_elemnt = soup.find("p", class_="sc-54nboa-0 deLyrJ yjSlinkDirectlink highLightSearchTarget")
+    article_elemnt = soup.find("p", class_="sc-54nboa-0")
     article = article_elemnt.get_text()
     combined.append(article)
     return combined

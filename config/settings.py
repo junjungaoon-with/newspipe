@@ -36,11 +36,21 @@ def load_channel_env(channel_name: str) -> dict:
     else:
         return {}  # 環境変数なし
     
+def load_common_env() -> dict:
+    env_path = BASE_DIR / f"credentials/.common_env"
+    
+    if env_path.exists():
+        return dotenv_values(env_path)
+    else:
+        return {}  # 環境変数なし
+    
 def load_settings(channel_name: str) -> dict:
     """main.py から渡された channel をもとに設定をロードし dict を返す"""
 
     raw = load_channel_config(channel_name)
     channel_env = load_channel_env(channel_name)
+    common_env = load_common_env()
+    channel_env.update(common_env)  # common_env の値を channel_env にマージ
     extra_word = raw.get("extra_word") or ""
     settings = {
 
@@ -52,6 +62,7 @@ def load_settings(channel_name: str) -> dict:
         "SPREADSHEET_ID": channel_env.get("SPREADSHEET_ID"),
         "SOURCE_URLS": raw.get("source_urls", []),
         "GEMINI_API_KEY": channel_env.get("GEMINI_API_KEY"),
+        "YOUTUBE_API_KEY": channel_env.get("YOUTUBE_API_KEY"),
 
 
         #画像保存フォルダ
@@ -144,6 +155,9 @@ def load_settings(channel_name: str) -> dict:
         #通信
         "TIMEOUT" : 10,
         "RETRIES" : 3,
+
+        #Youtube
+        "CHANNEL_ID": raw.get("channel_id", ""),
     }
 
     return settings

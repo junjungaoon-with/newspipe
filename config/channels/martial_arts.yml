@@ -9,6 +9,8 @@ source_urls:
 
 enabled: true
 
+channel_id: ""
+
 genre: "格闘技"
 
 maintenance_sheets:

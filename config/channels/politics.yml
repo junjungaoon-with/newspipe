@@ -9,6 +9,8 @@ source_urls:
 
 enabled: true
 
+channel_id: ""
+
 genre: "政治" #is_targetの判断に使う
 
 maintenance_sheets:
