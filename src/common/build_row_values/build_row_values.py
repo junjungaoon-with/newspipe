@@ -3,6 +3,7 @@ import random
 from transformers import pipeline
 import torch
 
+
 # ===============================================================
 # 出力フォーマット整形
 # ===============================================================
@@ -48,7 +49,8 @@ def build_image_files(unique_id, pictures):
 
     return filled
 
-def build_image_files2(unique_id, count, article_elements_counts,pictures):
+
+def build_image_files2(unique_id, count, article_elements_counts, pictures):
     arr = []
 
     arr.append(f"thumbnail_{unique_id}.jpg")
@@ -56,17 +58,18 @@ def build_image_files2(unique_id, count, article_elements_counts,pictures):
     for i in range(article_elements_counts):
         arr.append(pictures[0])
 
-    for i in range(count-1-article_elements_counts):
-        if i <2:
+    for i in range(count - 1 - article_elements_counts):
+        if i < 2:
             arr.append(f"1_{unique_id}.jpg")
-        elif i<4:
+        elif i < 4:
             arr.append(f"2_{unique_id}.jpg")
         else:
             arr.append(f"3_{unique_id}.jpg")
 
     return arr
 
-def build_video_materials(count,video_material_column_setting):
+
+def build_video_materials(count, video_material_column_setting):
     arr = []
     if count >= 1:
         arr.append("テンプレ1.mp4")
@@ -76,7 +79,6 @@ def build_video_materials(count,video_material_column_setting):
         for i in range(3, count + 1):
             arr.append(video_material_column_setting)
     return arr
-
 
 
 def build_talksetting(count):
@@ -100,22 +102,31 @@ def build_talksetting(count):
     arr.append("2")
     return arr
 
-def build_se_row(image_files,talksetting):
+
+def build_se_row(image_files, talksetting):
     se_row = []
-    random_se = ["テキスト切り替えSE①.mp3","テキスト切り替えSE②.mp3","テキスト切り替えSE③.mp3","テキスト切り替えSE④.mp3","テキスト切り替えSE⑤.mp3"]
-    for e,i in enumerate(image_files):
+    random_se = [
+        "テキスト切り替えSE①.mp3",
+        "テキスト切り替えSE②.mp3",
+        "テキスト切り替えSE③.mp3",
+        "テキスト切り替えSE④.mp3",
+        "テキスト切り替えSE⑤.mp3",
+    ]
+    for e, i in enumerate(image_files):
         if e == 0:
             se_row.append("オンSE.mp3")
             prev_i = i
             continue
-            
+
         if prev_i != i:
             se_row.append("シャッター音.mp3")
         else:
             if talksetting[e] == "3":
                 se_row.append("テキスト切り替えSE①.mp3")
             elif talksetting[e] == "8":
-                se_row.append("テキスト切り替えSE②.mp3",)
+                se_row.append(
+                    "テキスト切り替えSE②.mp3",
+                )
             elif talksetting[e] == "12":
                 se_row.append("テキスト切り替えSE③.mp3")
             elif talksetting[e] == "21":
@@ -123,12 +134,12 @@ def build_se_row(image_files,talksetting):
             elif talksetting[e] == "11":
                 se_row.append("テキスト切り替えSE⑤.mp3")
             else:
-                se_row.append("テキスト切り替えSE⑤.mp3")                
+                se_row.append("テキスト切り替えSE⑤.mp3")
         prev_i = i
     se_row = se_row[:-1]
 
-        
     return se_row
+
 
 def build_se_initial(se_row):
     se_initial_row = []
@@ -139,31 +150,48 @@ def build_se_initial(se_row):
             se_initial_row.append("SE先頭")
     return se_initial_row
 
+
 def build_text_setting(talksetting):
     text_setting = []
     text_setting.append("サムネ用、黄色い長方形、黒文字")
-    text_setting.append("本文解説、半透明黄色長方形、画像、白袋文字黒、文字サイズ75、改行20")
-    for e,i in enumerate(talksetting[2:]):
+    text_setting.append(
+        "本文解説、半透明黄色長方形、画像、白袋文字黒、文字サイズ75、改行20"
+    )
+    for e, i in enumerate(talksetting[2:]):
         if i == "3":
-            text_setting.append("動画反応解説、半透明ミドリ長方形、画像、白袋文字黒、文字サイズ75、改行20")
+            text_setting.append(
+                "動画反応解説、半透明ミドリ長方形、画像、白袋文字黒、文字サイズ75、改行20"
+            )
         elif i == "8":
-            text_setting.append("動画反応解説、半透明黄緑長方形、画像、白袋文字黒、文字サイズ75、改行20")
+            text_setting.append(
+                "動画反応解説、半透明黄緑長方形、画像、白袋文字黒、文字サイズ75、改行20"
+            )
         elif i == "12":
-            text_setting.append("動画反応解説、半透明青長方形、画像、白袋文字黒、文字サイズ75、改行20")
+            text_setting.append(
+                "動画反応解説、半透明青長方形、画像、白袋文字黒、文字サイズ75、改行20"
+            )
         elif i == "21":
-            text_setting.append("動画反応解説、半透明むらさき長方形、画像、白袋文字黒、文字サイズ75、改行20")
+            text_setting.append(
+                "動画反応解説、半透明むらさき長方形、画像、白袋文字黒、文字サイズ75、改行20"
+            )
         elif i == "11":
-            text_setting.append("動画反応解説、半透明濃い青長方形、画像、白袋文字黒、文字サイズ75、改行20")
+            text_setting.append(
+                "動画反応解説、半透明濃い青長方形、画像、白袋文字黒、文字サイズ75、改行20"
+            )
         else:
-            text_setting.append("動画反応解説、半透明濃い青長方形、画像、白袋文字黒、文字サイズ75、改行20")
-    
-    text_setting[-1] = "本文解説、半透明黄色長方形、画像、白袋文字黒、文字サイズ75、改行20"
+            text_setting.append(
+                "動画反応解説、半透明濃い青長方形、画像、白袋文字黒、文字サイズ75、改行20"
+            )
+
+    text_setting[-1] = (
+        "本文解説、半透明黄色長方形、画像、白袋文字黒、文字サイズ75、改行20"
+    )
     return text_setting
 
 
-def split_row_values(row_values,settings):
+def split_row_values(row_values, settings):
 
-    def split_by_rules(text,settings):
+    def split_by_rules(text, settings):
         MAX_LEN = settings["SPLIT_MAX_LEN"]
         RANGE_START = settings["SPLIT_RANGE_START"]
         RANGE_END = settings["SPLIT_RANGE_END"]
@@ -232,7 +260,6 @@ def split_row_values(row_values,settings):
     FIXED_TEXT_ROW = 16
     FIXED_TEXT_SETTING_ROW = 17
     FIXED_BGM_ROW = 18
-    
 
     row_len = len(row_values[TEXT1_ROW])
 
@@ -247,7 +274,7 @@ def split_row_values(row_values,settings):
     for col in range(1, row_len):
 
         text1 = row_values[TEXT1_ROW][col]
-        splited = split_by_rules(text1,settings)
+        splited = split_by_rules(text1, settings)
         n = len(splited)
 
         for r in range(len(row_values)):
@@ -266,19 +293,19 @@ def split_row_values(row_values,settings):
 
                 elif r == SE_ROW:
                     # ★ SE は追加列が空白
-                    original_val = row_values[r][col]      # 元のSE
-                    new_rows[r].append(original_val)       # まず元のSEを追加
-                    new_rows[r].extend([""] * (n - 1))     # 追加列だけ空白
-            
+                    original_val = row_values[r][col]  # 元のSE
+                    new_rows[r].append(original_val)  # まず元のSEを追加
+                    new_rows[r].extend([""] * (n - 1))  # 追加列だけ空白
+
                 elif r == NUMBER_ROW:
                     new_rows[r].extend([""] * n)  # 後で振り直す
 
                 elif r == SE_SETTING_ROW:
                     # ★ SE設定はコピー
                     # ★ SE は追加列が空白
-                    original_val = row_values[r][col]      # 元のSE
-                    new_rows[r].append(original_val)       # まず元のSEを追加
-                    new_rows[r].extend([""] * (n - 1))     # 追加列だけ空白
+                    original_val = row_values[r][col]  # 元のSE
+                    new_rows[r].append(original_val)  # まず元のSEを追加
+                    new_rows[r].extend([""] * (n - 1))  # 追加列だけ空白
 
                 else:
                     val = row_values[r][col]
@@ -290,8 +317,7 @@ def split_row_values(row_values,settings):
     new_rows[NUMBER_ROW] = ["番号"] + list(range(1, len(new_rows[NUMBER_ROW])))
 
     # --- 最後にendの行を振り直す ---
-    new_rows[FIXED_BGM_ROW+1] = [*[""]*len(new_rows[NUMBER_ROW]),"end"]
-
+    new_rows[FIXED_BGM_ROW + 1] = [*[""] * len(new_rows[NUMBER_ROW]), "end"]
 
     return new_rows
 
@@ -347,6 +373,7 @@ def judge_emotion_from_text(text):
     # 結果表示
     return emotion_ja
 
+
 def emotion_to_bgm(emotion):
     label_list = {
         "喜び": "喜び①BGM20251208.mp3",
@@ -362,22 +389,20 @@ def emotion_to_bgm(emotion):
     return bgm
 
 
-
-
 def normalize_block_text(text: str) -> str:
     """文頭・文末の余白を削除し、改行を整える"""
     text = text.strip()
-    text = re.sub(r'\n+', '\n', text)
+    text = re.sub(r"\n+", "\n", text)
     return text
+
 
 def normalize_inline_text(text: str) -> str:
     """スレ文脈用：>>番号の削除、w の統一"""
     # >>番号削除
-    text = re.sub(r'^>>\d+', '', text)
+    text = re.sub(r"^>>\d+", "", text)
     text = text.lstrip("、")
     # 改行を "、" に統一
     text = text.replace("\n", "、")
     # w の連続を1つに
-    text = re.sub(r'[ｗw]+', lambda m: m.group(0)[0], text)
+    text = re.sub(r"[ｗw]+", lambda m: m.group(0)[0], text)
     return text
-

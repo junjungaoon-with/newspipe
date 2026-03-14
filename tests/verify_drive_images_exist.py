@@ -13,8 +13,8 @@ def verify_drive_images_exist(values_out, settings) -> list:
     # サービス認証
     # ------------------------------------
     creds = Credentials.from_service_account_file(
-        os.path.join(settings["JSON_PATH"],"credentials.json"),
-        scopes=["https://www.googleapis.com/auth/drive.readonly"]
+        os.path.join(settings["JSON_PATH"], "credentials.json"),
+        scopes=["https://www.googleapis.com/auth/drive.readonly"],
     )
     service = build("drive", "v3", credentials=creds)
 

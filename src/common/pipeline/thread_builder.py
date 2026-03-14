@@ -1,14 +1,11 @@
-
-from src.common.utils.process_values import remove_num,skip_short_item
+from src.common.utils.process_values import remove_num, skip_short_item
 from urllib.parse import urlparse
 import os
 from src.common.utils.text_utils import remove_url
 from src.common.utils.text_utils import is_url
 
 
-
-def thread_builder(raw_threads :list[str])->tuple[list[str], list[str]]:
-
+def thread_builder(raw_threads: list[str]) -> tuple[list[str], list[str]]:
     """
     スレッド本文リスト（テキスト+画像URL混在）をもとに、
     各行に対応する「本文テキスト」と「画像ファイル名」を並行して生成する関数。
@@ -30,32 +27,31 @@ def thread_builder(raw_threads :list[str])->tuple[list[str], list[str]]:
             pictures : 各行に対応する画像ファイル名のリスト
     """
 
-
     # -------------------------------------------
     # 初期化
     # -------------------------------------------
-    threads = []          # スレッド本文（テキスト）
-    pictures =  []         # スレッドごとの画像ファイル名
+    threads = []  # スレッド本文（テキスト）
+    pictures = []  # スレッドごとの画像ファイル名
 
     # -------------------------------------------
     # メディア関連の初期化
     # -------------------------------------------
-    temp_pic_list = []   # 一時的な画像リスト
+    temp_pic_list = []  # 一時的な画像リスト
     temp_media_url = []  # 一時的なURLリスト
-    media_count = 1      # 画像番号カウンタ
+    media_count = 1  # 画像番号カウンタ
 
     # -------------------------------------------
     # 特殊パターンを処理主にyahoo ニュース用
     # -------------------------------------------
     if is_url(raw_threads[0]) and not is_url(raw_threads[1]) and len(raw_threads) == 2:
 
-        file_id = raw_threads[0].split('/')[-1].split('.')[0]
+        file_id = raw_threads[0].split("/")[-1].split(".")[0]
         path = urlparse(raw_threads[0]).path
         _, ext = os.path.splitext(path)
         pictures.append(f"{file_id}{ext}")
         threads.append(raw_threads[1])
         return threads, pictures
-    
+
     # -------------------------------------------
     # 画像が一番前に来るとスキップしてしまうので画像の場合は2番目にする
     # -------------------------------------------
@@ -83,7 +79,7 @@ def thread_builder(raw_threads :list[str])->tuple[list[str], list[str]]:
             if e > 0 and "http" in raw_threads[e - 1]:
                 path = urlparse(item).path
                 _, ext = os.path.splitext(path)
-                file_id = item.split('/')[-1].split('.')[0]
+                file_id = item.split("/")[-1].split(".")[0]
                 temp_pic_list.append(f"{file_id}{ext}")
                 temp_media_url.append(item)
                 media_count += 1
@@ -117,7 +113,7 @@ def thread_builder(raw_threads :list[str])->tuple[list[str], list[str]]:
             media_url = raw_threads[e + 1]
             path = urlparse(media_url).path
             _, ext = os.path.splitext(path)
-            file_id = media_url.split('/')[-1].split('.')[0]
+            file_id = media_url.split("/")[-1].split(".")[0]
             pictures.append(f"{file_id}{ext}")
 
             # 最初の画像だけズレ防止で2回入れる

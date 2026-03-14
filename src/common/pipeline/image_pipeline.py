@@ -3,6 +3,7 @@ from src.common.media.search.yahoo_image_search import search_main_pictures
 from src.common.media.downloader import download_and_save_images
 from src.common.google_drive.drive_uploader import upload_multiple_files_to_drive
 
+
 def fetch_and_upload_main_images(
     player_info: dict,
     unique_id: str,
@@ -19,10 +20,14 @@ def fetch_and_upload_main_images(
     urls = search_main_pictures(player_name, player_team, settings)
 
     # Step 2: ローカル保存
-    media_infos = download_and_save_images(urls, settings["SAVE_DIR"], player_name, unique_id,settings)
+    media_infos = download_and_save_images(
+        urls, settings["SAVE_DIR"], player_name, unique_id, settings
+    )
 
     # Step 3: Google Drive アップロード
-    uploaded_results = upload_multiple_files_to_drive(drive_service,media_infos, settings)
+    uploaded_results = upload_multiple_files_to_drive(
+        drive_service, media_infos, settings
+    )
 
     print(f"=== {player_name} の画像アップロード完了 ===")
 

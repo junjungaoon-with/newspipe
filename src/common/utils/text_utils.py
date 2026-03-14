@@ -1,26 +1,28 @@
 import re
 from pathlib import Path
-from urllib.parse import urlparse,urlunparse
+from urllib.parse import urlparse, urlunparse
 import random
 import string
+
 
 def contains_japanese(text: str) -> bool:
     # ひらがな・カタカナ・漢字が含まれているかチェック
     pattern = re.compile(r"[ぁ-んァ-ン一-龥]")
     return bool(pattern.search(text))
 
+
 def is_url(text: str) -> bool:
-    #URLかどうかチェック
+    # URLかどうかチェック
     return text.startswith("http") and not contains_japanese(text)
+
 
 def normalize_url(url: str) -> str:
     # URLの正規化処理
     url.strip()
     parsed = urlparse(url)
-    clean_url = urlunparse(
-        (parsed.scheme, parsed.netloc, parsed.path, "", "", "")
-    )
+    clean_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path, "", "", ""))
     return clean_url
+
 
 def remove_url(text: str) -> str:
     """
@@ -36,10 +38,7 @@ def remove_url(text: str) -> str:
         str: URL を除去したテキスト。
     """
 
-    URL_PATTERN = re.compile(
-        r"(https?://[^\s]+|www\.[^\s]+)",
-        re.IGNORECASE
-    )
+    URL_PATTERN = re.compile(r"(https?://[^\s]+|www\.[^\s]+)", re.IGNORECASE)
 
     # URL部分を "" に置き換え
     cleaned = URL_PATTERN.sub("", text)
@@ -47,10 +46,12 @@ def remove_url(text: str) -> str:
     # URL削除後の余分なスペースを整える
     return " ".join(cleaned.split())
 
+
 def extract_ext(url_or_path: str) -> str:
     """URL またはローカルパスから拡張子を取得"""
     path = urlparse(url_or_path).path
     return Path(path).suffix
+
 
 def remove_sumikakko(text: str) -> str:
     """
@@ -61,6 +62,7 @@ def remove_sumikakko(text: str) -> str:
     result = re.sub(r"【[^】]*】", "", text)
     # 前後の余計な空白を削る
     return result.strip()
+
 
 def generate_random_code(length: int = 8) -> str:
     """

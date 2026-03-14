@@ -13,6 +13,7 @@ NewsPipe 共通ロガー設定
 import logging
 from pathlib import Path
 
+
 class SafeFormatter(logging.Formatter):
     def format(self, record):
         # コンテキスト系フィールドが無かったらデフォルト値を入れる
@@ -21,7 +22,8 @@ class SafeFormatter(logging.Formatter):
         if not hasattr(record, "step"):
             record.step = "-"
         return super().format(record)
-    
+
+
 def setup_logger(
     name: str,
     log_dir: Path,
@@ -52,10 +54,9 @@ def setup_logger(
         return logger
 
     formatter = SafeFormatter(
-    "%(asctime)s | %(levelname)s | %(name)s | "
-    "channel=%(channel)s | step=%(step)s  | %(message)s"
+        "%(asctime)s | %(levelname)s | %(name)s | "
+        "channel=%(channel)s | step=%(step)s  | %(message)s"
     )
-    
 
     # =========================
     # 通常ログ（INFO以上）
@@ -91,10 +92,9 @@ def setup_logger(
     return logger
 
 
-
 def get_logger(name: str, **context) -> logging.Logger:
     """
- 
+
     Args:
         name (str): ロガー名（例: "NewsPipe.baseball"）
 

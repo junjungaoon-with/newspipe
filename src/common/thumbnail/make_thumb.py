@@ -1,18 +1,14 @@
 import os
 from PIL import Image
 
+
 def concat_two_images_fit_height_then_width1920(
-        
-    img1_path: str,
-    img2_path: str,
-    unique_id:str,
-    settings: dict
+    img1_path: str, img2_path: str, unique_id: str, settings: dict
 ):
     target_height = settings["DOUBLE_THUMB_TARGET_HIGHT"]
     out_path = f"__tmp_{unique_id}_double_thumb.jpg"
     out_path = os.path.join(settings["SAVE_DIR"], out_path)
 
-    
     # 画像読み込み（透過も扱えるようRGBA）
     im1 = Image.open(img1_path).convert("RGBA")
     im2 = Image.open(img2_path).convert("RGBA")

@@ -14,16 +14,42 @@ from google.auth.transport.requests import Request
 # =====================================
 SCOPES = [
     "https://www.googleapis.com/auth/youtube",
-    "https://www.googleapis.com/auth/youtube.upload"
+    "https://www.googleapis.com/auth/youtube.upload",
 ]
 
 # 投稿候補時間リスト（30分刻み）
 CANDIDATE_TIMES = [
-    "0800","0830","0900","0930","1000","1030",
-    "1100","1130","1200","1230","1300","1330",
-    "1400","1430","1500","1530","1600","1630",
-    "1700","1730","1800","1830","1900","1930",
-    "2000","2030","2100","2130","2200","2230","2300"
+    "0800",
+    "0830",
+    "0900",
+    "0930",
+    "1000",
+    "1030",
+    "1100",
+    "1130",
+    "1200",
+    "1230",
+    "1300",
+    "1330",
+    "1400",
+    "1430",
+    "1500",
+    "1530",
+    "1600",
+    "1630",
+    "1700",
+    "1730",
+    "1800",
+    "1830",
+    "1900",
+    "1930",
+    "2000",
+    "2030",
+    "2100",
+    "2130",
+    "2200",
+    "2230",
+    "2300",
 ]
 
 # =====================================
@@ -47,6 +73,7 @@ TOKENS_DIR = os.path.join(BASE_DIR, "tokens")
 os.makedirs(TOKENS_DIR, exist_ok=True)
 
 GIF_STATE_FILE = os.path.join(TOKENS_DIR, "gif_state.pkl")
+
 
 def get_authenticated_service(token_file="token_main.pickle"):
     """
@@ -82,11 +109,7 @@ def get_authenticated_service(token_file="token_main.pickle"):
 def get_latest_upload_datetime(youtube):
     # 1) searchは videoId だけ取る（snippetに依存しない）
     req = youtube.search().list(
-        part="id",
-        forMine=True,
-        type="video",
-        order="date",
-        maxResults=1
+        part="id", forMine=True, type="video", order="date", maxResults=1
     )
     # デバッグしたいなら↓有効化
     print("SEARCH:", req.uri)
@@ -101,10 +124,7 @@ def get_latest_upload_datetime(youtube):
         return None
 
     # 2) videos.list で publishedAt / publishAt を取得
-    vreq = youtube.videos().list(
-        part="snippet,status",
-        id=video_id
-    )
+    vreq = youtube.videos().list(part="snippet,status", id=video_id)
     # デバッグしたいなら↓有効化
     print("VIDEOS:", vreq.uri)
 
@@ -114,11 +134,14 @@ def get_latest_upload_datetime(youtube):
         return None
 
     v = vitems[0]
-    publish_at = v.get("status", {}).get("publishAt") or v.get("snippet", {}).get("publishedAt")
+    publish_at = v.get("status", {}).get("publishAt") or v.get("snippet", {}).get(
+        "publishedAt"
+    )
     if not publish_at:
         return None
 
     return datetime.datetime.fromisoformat(publish_at.replace("Z", "+00:00"))
+
 
 # =====================================
 # 最新投稿が今日より前なら 今日00:00 に修正
@@ -127,8 +150,7 @@ def adjust_latest_datetime(latest_dt):
     today = datetime.date.today()
     if latest_dt.date() < today:
         return datetime.datetime.combine(
-            today,
-            datetime.time(0, 0, 0, tzinfo=latest_dt.tzinfo)
+            today, datetime.time(0, 0, 0, tzinfo=latest_dt.tzinfo)
         )
     return latest_dt
 
@@ -149,8 +171,7 @@ def generate_schedule_times(latest_dt, count):
             hour = int(t[:2])
             minute = int(t[2:])
             dt = datetime.datetime.combine(
-                base_date,
-                datetime.time(hour, minute, tzinfo=JST)
+                base_date, datetime.time(hour, minute, tzinfo=JST)
             )
             if dt > target_dt:
                 scheduled = dt
@@ -163,7 +184,7 @@ def generate_schedule_times(latest_dt, count):
             minute = int(first_t[2:])
             scheduled = datetime.datetime.combine(
                 base_date + datetime.timedelta(days=1),
-                datetime.time(hour, minute, tzinfo=JST)
+                datetime.time(hour, minute, tzinfo=JST),
             )
 
         target_dt = scheduled
@@ -181,15 +202,18 @@ def generate_schedule_times(latest_dt, count):
 from googleapiclient.http import MediaFileUpload
 import time
 
+
 def upload_video(
     youtube,
     file_path: str,
     title: str,
-    publish_time_iso: str | None = None,   # 例: "2025-12-20T23:00:00Z"（予約公開したい時だけ渡す）
+    publish_time_iso: (
+        str | None
+    ) = None,  # 例: "2025-12-20T23:00:00Z"（予約公開したい時だけ渡す）
     description: str = "",
     tags: list[str] | None = None,
     category_id: str = "22",
-    default_privacy: str = "public",       # 予約しない時の公開設定（public/unlisted/private）
+    default_privacy: str = "public",  # 予約しない時の公開設定（public/unlisted/private）
 ):
     """
     YouTubeへ動画アップロード。
@@ -229,9 +253,7 @@ def upload_video(
     media = MediaFileUpload(file_path, chunksize=-1, resumable=True)
 
     request = youtube.videos().insert(
-        part="snippet,status",
-        body=body,
-        media_body=media
+        part="snippet,status", body=body, media_body=media
     )
 
     response = None
@@ -255,9 +277,6 @@ def upload_video(
     video_id = response.get("id")
     print("✅ Uploaded video id:", video_id)
     return video_id
-
-
-
 
 
 # ===================

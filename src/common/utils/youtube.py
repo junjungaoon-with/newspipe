@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(ROOT))
 from config.settings import load_settings
 
+
 def get_today_video_count(api_key: str, channel_id: str) -> int:
     """
     指定チャンネルの本日の動画投稿数を取得する
@@ -21,9 +22,7 @@ def get_today_video_count(api_key: str, channel_id: str) -> int:
 
     # 日本時間で今日の0時を取得
     jst = pytz.timezone("Asia/Tokyo")
-    today_start = datetime.now(jst).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    today_start = datetime.now(jst).replace(hour=0, minute=0, second=0, microsecond=0)
 
     # UTCに変換（APIはUTC指定）
     today_start_utc = today_start.astimezone(timezone.utc).isoformat()
@@ -33,12 +32,13 @@ def get_today_video_count(api_key: str, channel_id: str) -> int:
         channelId=channel_id,
         publishedAfter=today_start_utc,
         type="video",
-        maxResults=50
+        maxResults=50,
     )
 
     response = request.execute()
 
     return len(response.get("items", []))
+
 
 if __name__ == "__main__":
     # テスト用のAPIキーとチャンネルIDを設定

@@ -6,7 +6,6 @@ from time import sleep
 
 from src.common.utils.logger import get_logger
 
-
 # ユーザーエージェント（将来差し替え可能）
 HEADERS = {
     "User-Agent": (
@@ -58,4 +57,3 @@ def fetch_html(url: str, settings: dict) -> str:
             sleep(1)
 
     return ""
-

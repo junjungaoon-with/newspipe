@@ -5,8 +5,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 
-def get_drive_service(settings) ->any:
-# Driveのスコープ（ファイル操作用）
+
+def get_drive_service(settings) -> any:
+    # Driveのスコープ（ファイル操作用）
     """
     シートなどはサービスアカウントでの接続が可能だがマイドライブはサービスアカウントでは無理
     そのためOAuthで通す
@@ -23,15 +24,14 @@ def get_drive_service(settings) ->any:
         Any: Google Drive API のサービスオブジェクト（googleapiclient.discovery.Resource）。
              `service.files().list()` などの Drive 操作が可能。
     """
-    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+    SCOPES = ["https://www.googleapis.com/auth/drive.file"]
     creds = None
     token_path = settings["TOKEN_PICKLE_PATH"]
     secret_path = os.path.join(settings["JSON_PATH"], "client_secret.json")
 
-
     # 保存済みトークンを使う（2回目以降は自動ログイン）
     if os.path.exists(token_path):
-        with open(token_path, 'rb') as token:
+        with open(token_path, "rb") as token:
             creds = pickle.load(token)
 
     # トークンがない場合 → ブラウザで認証
@@ -44,17 +44,10 @@ def get_drive_service(settings) ->any:
                 creds = None
 
     if not creds or not creds.valid:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            secret_path,
-            SCOPES
-        )
-        creds = flow.run_local_server(
-            port=0,
-            access_type="offline",
-            prompt="consent"
-        )
+        flow = InstalledAppFlow.from_client_secrets_file(secret_path, SCOPES)
+        creds = flow.run_local_server(port=0, access_type="offline", prompt="consent")
         # トークンを保存
-        with open(token_path, 'wb') as token:
+        with open(token_path, "wb") as token:
             pickle.dump(creds, token)
 
-    return build('drive', 'v3', credentials=creds)
+    return build("drive", "v3", credentials=creds)

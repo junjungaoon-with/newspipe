@@ -2,7 +2,9 @@ from common.scraping.run_selenium import set_up_selenium
 from common.scraping.run_selenium import search_picture_by_yahoo
 
 
-def search_main_pictures(player_name: str, player_team:  str | None, settings: dict) -> list[str]:
+def search_main_pictures(
+    player_name: str, player_team: str | None, settings: dict
+) -> list[str]:
     """
     人物名 + チーム・団体名から Yahoo 画像検索で画像URL一覧を取得する。
     """

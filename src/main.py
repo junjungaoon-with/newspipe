@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from time import sleep
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
 
@@ -9,22 +10,24 @@ from config.settings import load_settings
 from src.common.utils.logger import setup_logger
 from src.common.pipeline.article_pipeline import run_pipeline
 from src.common.google_drive.drive_client import get_drive_service
+
+
 def main():
     channel_list = [
-                    "martial_arts",
-                    "baseball",
-                    "IT",
-                    "soccer",
-                    #"volleyball",
-                    "international_news",
-                    #"basketball",
-                    "entertainment",
-                    "tenis",
-                    "politics",
-                    ]
+        "martial_arts",
+        "baseball",
+        "IT",
+        "soccer",
+        # "volleyball",
+        "international_news",
+        # "basketball",
+        "entertainment",
+        "tenis",
+        "politics",
+    ]
 
-    #API疎通テスト
-    #ループ前に認証のみ通しておく（これもループ内に入れると毎回認証してしまう）
+    # API疎通テスト
+    # ループ前に認証のみ通しておく（これもループ内に入れると毎回認証してしまう）
     for channel in channel_list:
         settings = load_settings(channel)
         logger = setup_logger(
@@ -43,10 +46,9 @@ def main():
     while True:
         for channel in channel_list:
             settings = load_settings(channel)
-            
 
             if not settings["IS_ENABLED"]:
-                continue 
+                continue
 
             logger = setup_logger(
                 name=channel,
@@ -61,7 +63,7 @@ def main():
                 sleep(10)
                 pass
         sleep(10)
-        
+
 
 if __name__ == "__main__":
     main()

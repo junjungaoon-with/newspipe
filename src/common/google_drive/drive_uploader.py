@@ -2,10 +2,11 @@ from googleapiclient.http import MediaFileUpload
 from typing import List, Dict
 from src.common.utils.logger import get_logger
 
+
 def upload_multiple_files_to_drive(
     drive_service,
     media_infos: List[Dict[str, str]],
-    settings: dict ,
+    settings: dict,
 ) -> List[Dict[str, str]]:
     """
     複数ファイルを Google Drive にアップロードする関数。
@@ -34,9 +35,7 @@ def upload_multiple_files_to_drive(
     """
 
     logger = get_logger(
-        settings["CHANNEL_NAME"],
-        channel=settings["CHANNEL_NAME"],
-        step="drive_upload"
+        settings["CHANNEL_NAME"], channel=settings["CHANNEL_NAME"], step="drive_upload"
     )
     uploaded_results = []
     folder_id = settings["DRIVE_ID"]
@@ -55,20 +54,20 @@ def upload_multiple_files_to_drive(
             uploaded = (
                 drive_service.files()
                 .create(
-                    body=file_metadata,
-                    media_body=media,
-                    fields="id, name, webViewLink"
+                    body=file_metadata, media_body=media, fields="id, name, webViewLink"
                 )
                 .execute()
             )
 
-            logger.info(f"ファイルアップロード成功: {filename} (URL: {uploaded['webViewLink']})")
+            logger.info(
+                f"ファイルアップロード成功: {filename} (URL: {uploaded['webViewLink']})"
+            )
 
             uploaded_results.append(
                 {
                     "id": uploaded["id"],
                     "name": uploaded["name"],
-                    "link": uploaded["webViewLink"]
+                    "link": uploaded["webViewLink"],
                 }
             )
 
@@ -82,7 +81,7 @@ def upload_file_to_drive(
     drive_service,
     local_path: str,
     filename: str,
-    settings: dict ,
+    settings: dict,
 ) -> list[dict[str, str]]:
     """
     単一ファイルを Google Drive にアップロードする関数。
@@ -110,9 +109,7 @@ def upload_file_to_drive(
             アップロード失敗時は None を返す。
     """
     logger = get_logger(
-        settings["CHANNEL_NAME"],
-        channel=settings["CHANNEL_NAME"],
-        step="drive_upload"
+        settings["CHANNEL_NAME"], channel=settings["CHANNEL_NAME"], step="drive_upload"
     )
 
     try:
@@ -126,19 +123,19 @@ def upload_file_to_drive(
         uploaded = (
             drive_service.files()
             .create(
-                body=file_metadata,
-                media_body=media,
-                fields="id, name, webViewLink"
+                body=file_metadata, media_body=media, fields="id, name, webViewLink"
             )
             .execute()
         )
 
-        logger.info(f"ファイルアップロード成功: {filename} (URL: {uploaded['webViewLink']})")
+        logger.info(
+            f"ファイルアップロード成功: {filename} (URL: {uploaded['webViewLink']})"
+        )
 
         return {
             "id": uploaded["id"],
             "name": uploaded["name"],
-            "link": uploaded["webViewLink"]
+            "link": uploaded["webViewLink"],
         }
 
     except Exception as e:

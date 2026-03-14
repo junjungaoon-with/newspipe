@@ -3,6 +3,8 @@ from selenium.webdriver.common.by import By
 from time import sleep
 import random
 from urllib.parse import quote
+
+
 def set_up_selenium():
     # Chromeドライバを起動（ヘッドレスモード推奨）
     options = webdriver.ChromeOptions()
@@ -10,9 +12,10 @@ def set_up_selenium():
     driver = webdriver.Chrome(options=options)
     return driver
 
-def serch_picture_by_selenium(driver,query,settings):
+
+def serch_picture_by_selenium(driver, query, settings):
     get_max_picture = settings["GET_MAX_PICTURE"]
-    
+
     # Google画像検索ページを開く
     driver.get(f"https://www.google.com/search?tbm=isch&q={query}")
 
@@ -23,7 +26,7 @@ def serch_picture_by_selenium(driver,query,settings):
     result_html = driver.find_element(By.ID, "rso")
     images_html = result_html.find_elements(By.TAG_NAME, "img")
     images_html = images_html[:get_max_picture]
-    images_url = [x.get_attribute('src') for x in images_html]
+    images_url = [x.get_attribute("src") for x in images_html]
 
     # get_max_picture枚の画像URLを抽出
     return images_url
@@ -42,7 +45,9 @@ def search_picture_by_yahoo(driver, query):
     sleep(1)
 
     # 画像要素を取得
-    image_elements = driver.find_elements(By.CLASS_NAME, "sw-Thumbnail__image.sw-Thumbnail__image--tile")
+    image_elements = driver.find_elements(
+        By.CLASS_NAME, "sw-Thumbnail__image.sw-Thumbnail__image--tile"
+    )
 
     # 最初の10件を取得し、ランダムな順番に並べ替える
     sample_elements = image_elements[:10]
@@ -55,7 +60,9 @@ def search_picture_by_yahoo(driver, query):
             elem.click()
             sleep(1)
 
-            new_pic_elem = driver.find_element(By.CLASS_NAME, "sw-PreviewPanel__imageBlock")
+            new_pic_elem = driver.find_element(
+                By.CLASS_NAME, "sw-PreviewPanel__imageBlock"
+            )
             new_pic_elem = new_pic_elem.find_element(By.TAG_NAME, "img")
 
             src = new_pic_elem.get_attribute("src")

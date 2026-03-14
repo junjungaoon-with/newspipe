@@ -9,6 +9,7 @@ import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+
 def get_sheet(sheet_name: str, settings: dict) -> Any:
     """
     指定シートを gspread Worksheet として返す。
@@ -23,8 +24,7 @@ def get_sheet(sheet_name: str, settings: dict) -> Any:
     creds_file = os.path.join(settings["JSON_PATH"], "credentials.json")
 
     creds = ServiceAccountCredentials.from_json_keyfile_name(
-        creds_file,
-        ["https://www.googleapis.com/auth/spreadsheets"]
+        creds_file, ["https://www.googleapis.com/auth/spreadsheets"]
     )
 
     client = gspread.authorize(creds)

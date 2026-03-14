@@ -4,6 +4,7 @@ from typing import Literal
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 
+
 def verify_drive_images_exist(values_out, settings) -> list:
     """
     values_out（build_row_valuesの出力）内の
@@ -19,8 +20,8 @@ def verify_drive_images_exist(values_out, settings) -> list:
     # サービス認証
     # ------------------------------------
     creds = Credentials.from_service_account_file(
-        os.path.join(settings["JSON_PATH"],"credentials.json"),
-        scopes=["https://www.googleapis.com/auth/drive.readonly"]
+        os.path.join(settings["JSON_PATH"], "credentials.json"),
+        scopes=["https://www.googleapis.com/auth/drive.readonly"],
     )
     service = build("drive", "v3", credentials=creds)
 
@@ -55,10 +56,6 @@ def verify_drive_images_exist(values_out, settings) -> list:
     return missing_files
 
 
-
-
-
-
 def remove_duplicate_names_in_folder(
     drive_service,
     folder_id: str,
@@ -82,11 +79,15 @@ def remove_duplicate_names_in_folder(
     """
 
     query = f"'{folder_id}' in parents and trashed = false"
-    results = drive_service.files().list(
-        q=query,
-        fields="files(id, name, modifiedTime, mimeType)",
-        pageSize=1000,
-    ).execute()
+    results = (
+        drive_service.files()
+        .list(
+            q=query,
+            fields="files(id, name, modifiedTime, mimeType)",
+            pageSize=1000,
+        )
+        .execute()
+    )
 
     files = results.get("files", [])
 

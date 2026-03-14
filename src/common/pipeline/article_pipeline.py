@@ -9,20 +9,39 @@ import re
 import traceback
 
 from src.common.scraping.fetcher import fetch_html
-from src.common.scraping.html_parser import parse_article_list, parse_article_simple_info, parse_article_detail_info, parse_comments
+from src.common.scraping.html_parser import (
+    parse_article_list,
+    parse_article_simple_info,
+    parse_article_detail_info,
+    parse_comments,
+)
 from src.common.utils.logger import get_logger
 from src.common.google_drive.drive_client import get_drive_service
-from src.common.google_drive.drive_utils import verify_drive_images_exist,remove_duplicate_names_in_folder
+from src.common.google_drive.drive_utils import (
+    verify_drive_images_exist,
+    remove_duplicate_names_in_folder,
+)
 from common.pipeline.thumbnails_pipeline import make_thumbnail
 from src.common.pipeline.image_pipeline import fetch_and_upload_main_images
 from src.common.pipeline.build_row_values import build_row_values
 from src.common.gemini.client import call_gemini
 from src.common.gemini.build_prompt import build_title_prompt
-from src.common.sheets.repository import append_table,get_sheet,get_researched_urls,append_researched_urls,get_sheet_values
+from src.common.sheets.repository import (
+    append_table,
+    get_sheet,
+    get_researched_urls,
+    append_researched_urls,
+    get_sheet_values,
+)
 from src.common.sheets.maintenance import delete_over_max_rows
 from config.settings import load_settings
-from src.common.gemini.build_prompt import build_summarize_article_prompt, build_summarize_comments_prompt, judge_target_prompt
+from src.common.gemini.build_prompt import (
+    build_summarize_article_prompt,
+    build_summarize_comments_prompt,
+    judge_target_prompt,
+)
 from src.common.utils.list_utils import is_too_long
+
 
 def load_config(channel_name: str) -> dict:
     """
@@ -57,38 +76,31 @@ def run_pipeline(settings: dict):
 
     settings = load_settings(channel)
 
-    #テスト
+    # テスト
     # for i in settings["MAINTENANCE_SHEETS"]:
     #     get_sheet_values(i,settings)
 
-    logger = get_logger(
-        channel,
-        channel=channel,
-        step="pipeline"
-    )
+    logger = get_logger(channel, channel=channel, step="pipeline")
 
     logger.info("Pipeline start")
 
     logger = get_logger(channel)
 
- 
-
     logger.info("========== Article Pipeline START ==========")
     logger.info(f"channel={channel}")
 
-    #Google DriveのOAutu認証
+    # Google DriveのOAutu認証
     drive_service = get_drive_service(settings)
 
     if not settings.get("IS_ENABLED", True):
         logger.info(f"Channel '{channel}' is disabled. Skipped.")
         return
 
-    #シートのMAX_DATA_ROWSを超過していたら削除
+    # シートのMAX_DATA_ROWSを超過していたら削除
     delete_over_max_rows(settings)
 
-    #Driveの同名ファイルを削除（重複消去）
-    remove_duplicate_names_in_folder(drive_service,settings["DRIVE_ID"],dry_run=False)
-    
+    # Driveの同名ファイルを削除（重複消去）
+    remove_duplicate_names_in_folder(drive_service, settings["DRIVE_ID"], dry_run=False)
 
     # ---------------------------------------------------------
     # 1 すべての取得元を巡回
@@ -96,7 +108,9 @@ def run_pipeline(settings: dict):
     for source in settings["SOURCE_URLS"]:
         source_url = source["url"]
         parser_name = source["parser_name"]
-        demand_to_check_target_channel = source.get("demand_to_check_target_channel",True)
+        demand_to_check_target_channel = source.get(
+            "demand_to_check_target_channel", True
+        )
 
         logger = get_logger(
             channel,
@@ -104,18 +118,18 @@ def run_pipeline(settings: dict):
             step="pipeline",
             source=source_url,
             article_url="-",
-        )        
+        )
 
         logger.info(f"Fetching list page: {source_url}")
 
-        html = fetch_html(source_url,settings)
-        article_urls = parse_article_list(html,parser_name)
+        html = fetch_html(source_url, settings)
+        article_urls = parse_article_list(html, parser_name)
 
         logger.info(f" {len(article_urls)}個の 記事を取得しました。 from {source_url}")
 
         researched_url = get_researched_urls(settings)
 
-        #リサーチ済みの物を省く
+        # リサーチ済みの物を省く
         article_urls = [u for u in article_urls if u not in researched_url]
         logger.info(f"{len(article_urls)}個の記事が新しいです。 {source_url}")
 
@@ -134,18 +148,18 @@ def run_pipeline(settings: dict):
 
             logger.info(f"{article_url} を精査します。")
 
-
-            detail_html = fetch_html(article_url,settings)
-            simple_info = parse_article_simple_info(detail_html,parser_name,logger)
+            detail_html = fetch_html(article_url, settings)
+            simple_info = parse_article_simple_info(detail_html, parser_name, logger)
             if not simple_info:
-                logger.info(f"本文が抽出できませんでした。そういうタイプのヤフーニュースか指定したクラスが変更された可能性があります。URL:{article_url} ")
+                logger.info(
+                    f"本文が抽出できませんでした。そういうタイプのヤフーニュースか指定したクラスが変更された可能性があります。URL:{article_url} "
+                )
                 continue
 
             title = simple_info["title"]
             comments = simple_info["comments"]
             genre = simple_info["genre"]
             num_comments = int(simple_info["num_comments"])
-
 
             """simple_info =dict{
             "title": 記事タイトル,
@@ -155,18 +169,22 @@ def run_pipeline(settings: dict):
 
             # ---------------------------------------------------------
             # 3-1 スレッド形式でない場合、コメント数を確認
-            # --------------------------------------------------------- 
+            # ---------------------------------------------------------
             if num_comments <= 5 and not source["is_thread"]:
-                #コメント数ではじく場合はリサーチ済みに入れずにコメント数が増えるまで待つ
-                logger.info(f"スレッド形式でなくコメントが少ないためいったんスキップします。タイトル:{title},URL:{article_url} ")
+                # コメント数ではじく場合はリサーチ済みに入れずにコメント数が増えるまで待つ
+                logger.info(
+                    f"スレッド形式でなくコメントが少ないためいったんスキップします。タイトル:{title},URL:{article_url} "
+                )
                 continue
             # ---------------------------------------------------------
             # 3-2 チャンネルのターゲットジャンル記事か判定(ex.野球かどうか？
             # ---------------------------------------------------------
-            if any( i is None for i in (title,comments,genre) ):
-                logger.warning(f"記事情報の取得に失敗しました。タイトル:{title},URL:{article_url}")
-                #操作済みURLリストに追記
-                append_researched_urls([article_url],settings)
+            if any(i is None for i in (title, comments, genre)):
+                logger.warning(
+                    f"記事情報の取得に失敗しました。タイトル:{title},URL:{article_url}"
+                )
+                # 操作済みURLリストに追記
+                append_researched_urls([article_url], settings)
                 continue
 
             if demand_to_check_target_channel:
@@ -184,29 +202,33 @@ def run_pipeline(settings: dict):
                     schema={
                         "type": "object",
                         "properties": {
-                            f"is_{settings['IS_TARGET_GENRE_WORD']}_article": {"type": "boolean"},
+                            f"is_{settings['IS_TARGET_GENRE_WORD']}_article": {
+                                "type": "boolean"
+                            },
                             "reason": {"type": "string"},
                         },
-                        "required": [f"is_{settings['IS_TARGET_GENRE_WORD']}_article", "reason"]
+                        "required": [
+                            f"is_{settings['IS_TARGET_GENRE_WORD']}_article",
+                            "reason",
+                        ],
                     },
                 )
 
-                is_target = temp_res.get(f"is_{settings['IS_TARGET_GENRE_WORD']}_article", False)
+                is_target = temp_res.get(
+                    f"is_{settings['IS_TARGET_GENRE_WORD']}_article", False
+                )
                 reason = temp_res.get("reason", "")
-            
+
             else:
                 is_target = True
                 reason = "geminiを通さずにターゲットジャンルと判定"
 
-
-
             if not is_target:
-                logger.info(f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article_url} 理由:{reason}")
-                append_researched_urls([article_url],settings)
+                logger.info(
+                    f"ターゲットジャンル外の記事のためスキップします。タイトル:{title},URL:{article_url} 理由:{reason}"
+                )
+                append_researched_urls([article_url], settings)
                 continue
-
-
-
 
             # ---------------------------------------------------------
             # 4 要件を満たしたので情報を詳しく取得
@@ -216,12 +238,19 @@ def run_pipeline(settings: dict):
                 if unique_id.split(".")[0] != "":
                     unique_id = unique_id.split(".")[0]
 
-                logger.info(f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article_url} ,理由:{reason} ")
-                threads, pictures = parse_article_detail_info(article_url,detail_html,parser_name,settings,drive_service)
+                logger.info(
+                    f"=== ターゲットジャンルのため詳しい記事内容を取得  {title[:20]}... URL:{article_url} ,理由:{reason} "
+                )
+                threads, pictures = parse_article_detail_info(
+                    article_url, detail_html, parser_name, settings, drive_service
+                )
 
             except Exception as e:
-                logger.error(f"記事情報取得中にエラーが出ました。タイトル:{title[:20]},URL:{article_url} error:{e}"+traceback.format_exc())
-                append_researched_urls([article_url],settings)
+                logger.error(
+                    f"記事情報取得中にエラーが出ました。タイトル:{title[:20]},URL:{article_url} error:{e}"
+                    + traceback.format_exc()
+                )
+                append_researched_urls([article_url], settings)
                 continue
 
             # ---------------------------------------------------------
@@ -238,36 +267,45 @@ def run_pipeline(settings: dict):
                         "thumbtext": {"type": "string"},
                         "thumbtext2": {"type": "string"},
                     },
-                    "required": ["title", "thumbtext", "thumbtext2"]
+                    "required": ["title", "thumbtext", "thumbtext2"],
                 },
-                temperature=0.5
+                temperature=0.5,
             )
 
             # ---------------------------------------------------------
             # 5-2 スレッド形式でない場合コメントを取得
             # ---------------------------------------------------------
             if not source["is_thread"]:
-                logger.info(f"=== スレッド形式でない記事のためコメントを取得  {title[:20]}... URL:{article_url} ===")
-                #コメント部分を取得
-                comments = parse_comments(article_url, parser_name,source, settings)
- 
+                logger.info(
+                    f"=== スレッド形式でない記事のためコメントを取得  {title[:20]}... URL:{article_url} ==="
+                )
+                # コメント部分を取得
+                comments = parse_comments(article_url, parser_name, source, settings)
+
             # ---------------------------------------------------------
             # 5-3 スレッド形式でない場合、本文とコメントを要約
             # ---------------------------------------------------------
             if not source["is_thread"]:
-                logger.info(f"=== スレッド形式でない記事のため本文とコメントを要約  {title[:20]}... URL:{article_url} ===")
+                logger.info(
+                    f"=== スレッド形式でない記事のため本文とコメントを要約  {title[:20]}... URL:{article_url} ==="
+                )
                 article_prompt = build_summarize_article_prompt(
                     article=threads,
                     title=title,
                     source=source,
                 )
-                #本文を要約してthreadsに格納
+                # 本文を要約してthreadsに格納
                 threads = call_gemini(
                     prompt=article_prompt,
                     settings=settings,
                     logger=logger,
-                    schema={"type": "object", "properties": {"script": {"type": "array", "items": {"type": "string"}}}},
-                    temperature=0.5
+                    schema={
+                        "type": "object",
+                        "properties": {
+                            "script": {"type": "array", "items": {"type": "string"}}
+                        },
+                    },
+                    temperature=0.5,
                 )
 
                 comments_prompt = build_summarize_comments_prompt(
@@ -276,15 +314,20 @@ def run_pipeline(settings: dict):
                     title=title,
                 )
 
-                #コメントを要約してcommentsに格納
+                # コメントを要約してcommentsに格納
                 comments = call_gemini(
                     prompt=comments_prompt,
                     settings=settings,
                     logger=logger,
-                    schema={"type": "object", "properties": {"script": {"type": "array", "items": {"type": "string"}}}},
-                    temperature=0.5
+                    schema={
+                        "type": "object",
+                        "properties": {
+                            "script": {"type": "array", "items": {"type": "string"}}
+                        },
+                    },
+                    temperature=0.5,
                 )
-                #threadsにコメントを追加
+                # threadsにコメントを追加
                 threads = [*threads["script"], *comments["script"]]
 
             # ---------------------------------------------------------
@@ -293,32 +336,38 @@ def run_pipeline(settings: dict):
             max_thread_length = settings.get("MAX_THREAD_LENGTH", 1000)
 
             if is_too_long(threads, max_thread_length, source, logger):
-                logger.warning(f"最大文字数を超えるコメントがありました、スキップします。: {title[:20]} ,URL:{article_url}")
+                logger.warning(
+                    f"最大文字数を超えるコメントがありました、スキップします。: {title[:20]} ,URL:{article_url}"
+                )
                 continue
 
             # ---------------------------------------------------------
             # 6 サムネイルの生成
             # ---------------------------------------------------------
-            is_thumbnail,thumbnail_pattern,player_info = make_thumbnail(title, threads, unique_id,settings,drive_service)
-            logger.info(f"サムネイルの生成に成功しました。タイトル:{title[:20]} ,URL:{article_url} ,pattern:{thumbnail_pattern} ,player:{player_info['name']}")
+            is_thumbnail, thumbnail_pattern, player_info = make_thumbnail(
+                title, threads, unique_id, settings, drive_service
+            )
+            logger.info(
+                f"サムネイルの生成に成功しました。タイトル:{title[:20]} ,URL:{article_url} ,pattern:{thumbnail_pattern} ,player:{player_info['name']}"
+            )
             if not is_thumbnail:
-                logger.warning(f"サムネイルの生成に失敗しました。タイトル:{title} ,URL:{article_url}")
+                logger.warning(
+                    f"サムネイルの生成に失敗しました。タイトル:{title} ,URL:{article_url}"
+                )
                 continue
 
             # ---------------------------------------------------------
             # 7 サムネイル以外の画像を取得
             # ---------------------------------------------------------
             num_media = len(list(dict.fromkeys(pictures)))
-            if player_info["name"] != None and num_media <= settings["MIN_REQUIRED_PICTURES"]:
-                #2 画像取得
-                uploaded_picuture  = fetch_and_upload_main_images(
-                    player_info,
-                    unique_id,
-                    drive_service,
-                    settings
+            if (
+                player_info["name"] != None
+                and num_media <= settings["MIN_REQUIRED_PICTURES"]
+            ):
+                # 2 画像取得
+                uploaded_picuture = fetch_and_upload_main_images(
+                    player_info, unique_id, drive_service, settings
                 )
-
-
 
             # ---------------------------------------------------------
             # 8 指示書を作成
@@ -334,19 +383,21 @@ def run_pipeline(settings: dict):
                 thumbnail_pattern=thumbnail_pattern,
                 source=source,
                 settings=settings,
-                )
-            
-            #素材がそろってるか確認
-            missing_files = verify_drive_images_exist(values_out,settings)
+            )
+
+            # 素材がそろってるか確認
+            missing_files = verify_drive_images_exist(values_out, settings)
             if missing_files:
-                logger.warning(f"Missing files for article '{title}': {missing_files}. Skipping article.")
+                logger.warning(
+                    f"Missing files for article '{title}': {missing_files}. Skipping article."
+                )
                 continue
             # ---------------------------------------------------------
-            # 9 指示書を出力    
+            # 9 指示書を出力
             # ---------------------------------------------------------
-            output_sheet = get_sheet(settings["SHEET_ARTICLE"],settings)
-            log_sheet = get_sheet(settings["SHEET_LOG"],settings)
-            while True:#衝突を避けるため
+            output_sheet = get_sheet(settings["SHEET_ARTICLE"], settings)
+            log_sheet = get_sheet(settings["SHEET_LOG"], settings)
+            while True:  # 衝突を避けるため
                 now = datetime.now()
                 if now.minute % 2 == 0 and now.second <= 49:  # 偶数 & 0〜49秒
                     append_table(output_sheet, values_out)
@@ -354,10 +405,10 @@ def run_pipeline(settings: dict):
                     break
                 sleep(5)
 
-            logger.info(f"記事の指示書をシートに出力しました。タイトル:{title},URL:{article_url}")
-            #操作済みURLリストに追記
-            append_researched_urls([article_url],settings)
-
-
+            logger.info(
+                f"記事の指示書をシートに出力しました。タイトル:{title},URL:{article_url}"
+            )
+            # 操作済みURLリストに追記
+            append_researched_urls([article_url], settings)
 
     logger.info("Pipeline completed.")

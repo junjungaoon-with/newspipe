@@ -1,5 +1,9 @@
-def judge_target_prompt(title: str, comments: str, genre: str , settings: dict,) -> str:
-
+def judge_target_prompt(
+    title: str,
+    comments: str,
+    genre: str,
+    settings: dict,
+) -> str:
 
     prompt = f"""
 以下は記事の情報です。判定してください。
@@ -29,7 +33,7 @@ reason には「{settings["GENRE"]}かどうか」の根拠を説明してくだ
 
 
 def build_title_prompt(title, article):
-        return f"""
+    return f"""
 以下は記事本文です。Youtubeのタイトルやサムネに使う短い文を生成してください。
 
 #ルール
@@ -116,7 +120,11 @@ OPSwwwww
     """
 
 
-def build_summarize_article_prompt(article: str, title: str, source: str,):
+def build_summarize_article_prompt(
+    article: str,
+    title: str,
+    source: str,
+):
     return f"""
 以下は記事本文です。Youtube用の読み上げ台本を作るので要約してください。
 
@@ -136,7 +144,8 @@ def build_summarize_article_prompt(article: str, title: str, source: str,):
 {article}
     """
 
-def build_summarize_comments_prompt(comments:list[str], title:str, source:dict):
+
+def build_summarize_comments_prompt(comments: list[str], title: str, source: dict):
     return f"""
 以下は野球記事のコメントです。Youtube用の台本を作るのでそれぞれのコメントを参考に要約してください。
 例に挙げた口調や文章の長さを参考にしてください。

@@ -3,7 +3,19 @@ from transformers import pipeline
 import torch
 
 
-from src.common.build_row_values.build_row_values import build_image_files, build_image_files2, build_video_materials, build_talksetting, build_se_row, build_se_initial, build_text_setting, split_row_values, normalize_block_text, normalize_inline_text, judge_emotion_from_text
+from src.common.build_row_values.build_row_values import (
+    build_image_files,
+    build_image_files2,
+    build_video_materials,
+    build_talksetting,
+    build_se_row,
+    build_se_initial,
+    build_text_setting,
+    split_row_values,
+    normalize_block_text,
+    normalize_inline_text,
+    judge_emotion_from_text,
+)
 from src.common.utils.text_utils import remove_sumikakko
 from src.common.utils.text_utils import generate_random_code
 
@@ -21,7 +33,7 @@ def build_row_values(
     source: dict,
     settings: dict,
 ):
-    """ スプレッドシートの1指示書分のデータを生成する
+    """スプレッドシートの1指示書分のデータを生成する
     Args:
         new_title (str): 生成された新しいYoutube動画タイトル
         thumb_text (str): 生成されたサムネイル下部テキスト
@@ -54,8 +66,6 @@ def build_row_values(
     for key, value in tem_bgm_map.items():
         bgm_map[key] = value
 
-
-
     # ============================================================
     #  2. テキスト整形（クリーニング関数）
     # ============================================================
@@ -76,10 +86,7 @@ def build_row_values(
     merged_text1 = [thumb_text, title] + article
 
     # 話す内容 (clean_texts)
-    clean_texts = [
-        normalize_inline_text(t)
-        for t in [thumb_text, title] + article
-    ]
+    clean_texts = [normalize_inline_text(t) for t in [thumb_text, title] + article]
 
     count = len(merged_text1)
 
@@ -97,7 +104,9 @@ def build_row_values(
     # ============================================================
     #  6. 動画素材・SE・話者設定など
     # ============================================================
-    video_materials = build_video_materials(count, settings["VIDEO_MATERIAL_COLUMN_SETTING"])
+    video_materials = build_video_materials(
+        count, settings["VIDEO_MATERIAL_COLUMN_SETTING"]
+    )
     talksetting = build_talksetting(count)
     se_row = build_se_row(image_files, talksetting)
     se_initial_row = build_se_initial(se_row)
@@ -116,9 +125,7 @@ def build_row_values(
         text2_setting = ""
     else:
         text2_setting = (
-            random.choice(text2_patterns)
-            if text2_patterns
-            else default_text2_setting
+            random.choice(text2_patterns) if text2_patterns else default_text2_setting
         )
 
     # ============================================================
@@ -147,7 +154,12 @@ def build_row_values(
         ["動画素材", *video_materials],
         ["動画設定", *[""] * count],
         ["静止画素材", *image_files],
-        ["静止画設定", picture_pattern, "そのまま張り付け画面上部", *["そのまま張り付け画面上部"] * (count - 2)],
+        [
+            "静止画設定",
+            picture_pattern,
+            "そのまま張り付け画面上部",
+            *["そのまま張り付け画面上部"] * (count - 2),
+        ],
         ["SE", *se_row],
         ["SE設定", *se_initial_row],
         ["テキスト1", *merged_text1],
@@ -163,7 +175,7 @@ def build_row_values(
     # ============================================================
     #  11. split_row_values → GIF や空欄の調整
     # ============================================================
-    row_values = split_row_values(row_values,settings)
+    row_values = split_row_values(row_values, settings)
 
     # ① 話す内容がない → 話す内容設定削除
     for i, val in enumerate(row_values[3]):

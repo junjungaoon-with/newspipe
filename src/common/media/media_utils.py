@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 from src.common.utils.text_utils import extract_ext
 
 
-
 def get_gif_duration(path: str) -> float:
     """GIF の総再生時間（秒）を返す"""
     with Image.open(path) as im:
@@ -15,8 +14,6 @@ def get_gif_duration(path: str) -> float:
             im.seek(frame)
             duration += im.info.get("duration", 0)  # ms 単位
     return duration / 1000.0  # 秒に変換
-
-
 
 
 def is_long_gif(local_path: str) -> bool:
@@ -31,7 +28,7 @@ def is_long_gif(local_path: str) -> bool:
         else:
             # 5秒未満の場合の処理
             return False
-        
+
 
 def save_image(data, dest_path, settings):
     """

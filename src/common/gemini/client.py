@@ -1,4 +1,3 @@
-
 """
 Gemini API 呼び出しの共通クライアント。
 """
@@ -7,8 +6,10 @@ from typing import Dict, Any
 import json
 import requests
 
-def call_gemini(prompt: str, settings: dict, logger, schema: dict = None, temperature: float = 0.2  ) -> Dict[str, Any]:
 
+def call_gemini(
+    prompt: str, settings: dict, logger, schema: dict = None, temperature: float = 0.2
+) -> Dict[str, Any]:
     """
     Gemini にプロンプトを送信し、JSONとして解析した結果を返す。
 

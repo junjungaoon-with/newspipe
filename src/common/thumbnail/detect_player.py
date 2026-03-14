@@ -3,6 +3,7 @@ import json
 from src.common.gemini.client import call_gemini
 from src.common.utils.logger import get_logger
 
+
 def detect_players(title: str, script_text: str, settings: dict) -> list[dict] | None:
 
     logger = get_logger(
@@ -45,7 +46,6 @@ def detect_players(title: str, script_text: str, settings: dict) -> list[dict] |
             エラー時は None。
     """
 
-
     prompt = f"""
 あなたはス記者です。
 以下の動画のタイトルと台本を読み、話題となっている人物を2人まで上げて下さい。
@@ -70,40 +70,38 @@ def detect_players(title: str, script_text: str, settings: dict) -> list[dict] |
 本文:
 {script_text}
 """
-    res = call_gemini(prompt,
-                      settings,
-                      logger=logger,
-                      schema={
-                          "type": "object",
-                          "properties": {
-                              "players": {
-                                  "type": "array",
-                                  "items": {
-                                      "type": "object",
-                                      "properties": {
-                                          "name": {"type": "string"},
-                                          "team": {"type": "string"},
-                                      },
-                                      "required": ["name", "team"]
-                                  }
-                              }
-                          },
-                          "required": ["players"]
-                      }
-                    )
-
-    
+    res = call_gemini(
+        prompt,
+        settings,
+        logger=logger,
+        schema={
+            "type": "object",
+            "properties": {
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "team": {"type": "string"},
+                        },
+                        "required": ["name", "team"],
+                    },
+                }
+            },
+            "required": ["players"],
+        },
+    )
 
     if not res:
         return None
-    
-    res= res.get("players", [])
+
+    res = res.get("players", [])
 
     return res
 
 
-
-#人物ではなく話題を抽出する場合の関数。detect_playersと同様の構造。
+# 人物ではなく話題を抽出する場合の関数。detect_playersと同様の構造。
 def detect_topic(title: str, script_text: str, settings: dict) -> list[dict] | None:
 
     logger = get_logger(
@@ -146,7 +144,6 @@ def detect_topic(title: str, script_text: str, settings: dict) -> list[dict] | N
             エラー時は None。
     """
 
-
     prompt = f"""
 あなたは記者です。
 以下の動画のタイトルと台本を読み、話題となっている事柄、概念、国名などを上げて下さい。
@@ -170,34 +167,32 @@ def detect_topic(title: str, script_text: str, settings: dict) -> list[dict] | N
 本文:
 {script_text}
 """
-    res = call_gemini(prompt,
-                      settings,
-                      logger=logger,
-                      schema={
-                          "type": "object",
-                          "properties": {
-                              "topics": {
-                                  "type": "array",
-                                  "items": {
-                                      "type": "object",
-                                      "properties": {
-                                          "topic": {"type": "string"},
-                                      },
-                                      "required": ["topic"]
-                                  }
-                              }
-                          },
-                          "required": ["topics"]
-                      }
-                    )
-
-
+    res = call_gemini(
+        prompt,
+        settings,
+        logger=logger,
+        schema={
+            "type": "object",
+            "properties": {
+                "topics": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "topic": {"type": "string"},
+                        },
+                        "required": ["topic"],
+                    },
+                }
+            },
+            "required": ["topics"],
+        },
+    )
 
     if not res:
         return None
 
-
-    res= res.get("topics", [])
+    res = res.get("topics", [])
     return_res = [
         {"name": res[0].get("topic", None), "team": None},
         {"name": res[1].get("topic", None), "team": None},

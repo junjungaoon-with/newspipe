@@ -3,7 +3,10 @@ import re
 from urllib.parse import urljoin
 from os import path
 
-from src.common.utils.list_utils import extract_only_long_gif_urls, process_raw_threads_from_long_gif_info
+from src.common.utils.list_utils import (
+    extract_only_long_gif_urls,
+    process_raw_threads_from_long_gif_info,
+)
 from src.common.utils.process_values import preprocess_raw_threads
 from src.common.scraping.html_parser import extract_media_url
 from common.pipeline.thread_builder import thread_builder
@@ -12,7 +15,8 @@ from src.common.google_drive.drive_uploader import upload_multiple_files_to_driv
 from src.common.scraping.fetcher import fetch_html
 from src.common.utils.text_utils import normalize_url
 
-def parse_articles_from_top_page(top_page_html: str)->list[dict]:
+
+def parse_articles_from_top_page(top_page_html: str) -> list[dict]:
     soup = BeautifulSoup(top_page_html, "lxml")
 
     article_urls = []
@@ -27,12 +31,7 @@ def parse_articles_from_top_page(top_page_html: str)->list[dict]:
     return article_urls
 
 
-
-
-
-
-
-def extract_simple_info_from_html(html: str,logger) -> dict:
+def extract_simple_info_from_html(html: str, logger) -> dict:
     """
     HTML内からターゲットジャンルかを判断するための情報を抽出してdictで返す関数。
 
@@ -42,7 +41,7 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
     Returns:
     dict
         {
-            
+
             "title": 記事タイトル,
             "ArticleText": 本文テキスト
             "num_comments":コメント数
@@ -52,10 +51,10 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
         }
     """
     soup = BeautifulSoup(html, "lxml")
-    article_info = []    
+    article_info = []
     article_list = []
 
-    #[url,comments,title,Genre]のリストを作成
+    # [url,comments,title,Genre]のリストを作成
     article_outer_element = soup.find("div", id="contentsWrap")
 
     try:
@@ -66,7 +65,6 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
                 if span.get_text().isdigit():
                     num_comments = int(span.get_text())
                     break
-                
 
         else:
             num_comments = 0
@@ -78,28 +76,29 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
     title = header.find("h1").get_text()
 
     genre = "unknown"
-        
-    #コメントのリストを作成
-    #存在確認
+
+    # コメントのリストを作成
+    # 存在確認
     if not soup.find("p", class_="sc-54nboa-0"):
         return None
-        
+
     for article_element in soup.find("p", class_="sc-54nboa-0"):
         article = article_element.get_text()
-        article_list.append(article)#記事本文全体だがほかの記事元と合わせるためこう呼ぶ
+        article_list.append(
+            article
+        )  # 記事本文全体だがほかの記事元と合わせるためこう呼ぶ
 
-
-    article_info={
+    article_info = {
         "title": title,
         "num_comments": num_comments,
-        "comments": article_list,#記事本文全体だがほかの記事元と合わせるためこう呼ぶ
+        "comments": article_list,  # 記事本文全体だがほかの記事元と合わせるためこう呼ぶ
         "genre": genre,
-
     }
 
     return article_info
 
-def parse_thread_content(url: str, html: str)-> list[str]:
+
+def parse_thread_content(url: str, html: str) -> list[str]:
     """
     HTML からスレッド本文のテキストおよび有効な画像URLを抽出する関数。
 
@@ -124,7 +123,7 @@ def parse_thread_content(url: str, html: str)-> list[str]:
 
     combined = []  # テキストとURLを順番通りに格納
 
-    #記事のサムネを取得
+    # 記事のサムネを取得
     thumbnail_url = soup.find("img", class_="riff-Thumbnail__image--image").get("src")
     thumbnail_url = normalize_url(thumbnail_url)
     combined.append(thumbnail_url)
@@ -135,8 +134,9 @@ def parse_thread_content(url: str, html: str)-> list[str]:
     return combined
 
 
-
-def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_service) -> tuple[list[str], list[str]]:
+def extract_detail_info_from_html(
+    url: str, html: str, settings: dict, drive_service
+) -> tuple[list[str], list[str]]:
     """
     指定URLの記事からスレッド本文と画像URLを抽出し、
     台本作成に必要な threads / pictures / media_urls を返す。
@@ -152,51 +152,51 @@ def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_ser
             (threads, pictures)
     """
 
-
     # -------------------------------------------
     # 初期化
     # -------------------------------------------
-    threads = []          # スレッド本文（テキスト）
-    pictures =  []         # スレッドごとの画像ファイル名
-    media_urls = []       # 実際の画像URL
+    threads = []  # スレッド本文（テキスト）
+    pictures = []  # スレッドごとの画像ファイル名
+    media_urls = []  # 実際の画像URL
 
     # -------------------------------------------
     # BeautifulSoupで記事本文の要素を探索
     # -------------------------------------------
-    raw_threads = parse_thread_content(url,html)
+    raw_threads = parse_thread_content(url, html)
 
     # -------------------------------------------
     # 重複除去
     # -------------------------------------------
     raw_threads = preprocess_raw_threads(raw_threads)
-    
+
     # -------------------------------------------
     # スレッドにある全画像の保存
     # -------------------------------------------
     media_urls = extract_media_url(raw_threads)
     media_infos = []
     for media_url in media_urls:
-        #ローカルへの保存
-        media_info = save_media_from_url(media_url,settings)
+        # ローカルへの保存
+        media_info = save_media_from_url(media_url, settings)
         media_infos.append(media_info)
 
-
-    #Driveへの保存
-    uploaded_results = upload_multiple_files_to_drive(drive_service, media_infos, settings)
-    #TODO
-    #uploaded_resultsをもとに失敗したときの処理を書く
-
+    # Driveへの保存
+    uploaded_results = upload_multiple_files_to_drive(
+        drive_service, media_infos, settings
+    )
+    # TODO
+    # uploaded_resultsをもとに失敗したときの処理を書く
 
     # -------------------------------------------
     # GIFの長さ情報を使う場合（空文字挿入処理）GIFがない媒体でも処理可能→その場合何も起こらない
     # -------------------------------------------
 
-    #GIFの長さを確認してリストにまとめる
+    # GIFの長さを確認してリストにまとめる
     only_long_gif_urls = extract_only_long_gif_urls(media_url)
 
-    #GIF情報をもとに処理
-    raw_threads = process_raw_threads_from_long_gif_info(raw_threads,only_long_gif_urls)
-
+    # GIF情報をもとに処理
+    raw_threads = process_raw_threads_from_long_gif_info(
+        raw_threads, only_long_gif_urls
+    )
 
     # -------------------------------------------
     # テキストと画像を順に処理
@@ -205,7 +205,11 @@ def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_ser
     return threads, pictures
 
 
-def extract_comments(url: str, source: dict, settings:dict,) -> str:
+def extract_comments(
+    url: str,
+    source: dict,
+    settings: dict,
+) -> str:
     """
     指定URLの記事からコメント部分を抽出し、文字列で返す。
 
@@ -217,9 +221,11 @@ def extract_comments(url: str, source: dict, settings:dict,) -> str:
             コメント部分のテキスト
     """
 
-    #url = path.join(url, source.get("comment_add_url_word",""))
- 
-    detail_html = fetch_html(url + f"/{source.get('comment_add_url_word','')}",settings)
+    # url = path.join(url, source.get("comment_add_url_word",""))
+
+    detail_html = fetch_html(
+        url + f"/{source.get('comment_add_url_word','')}", settings
+    )
     comment_soup = BeautifulSoup(detail_html, "lxml")
     extracted_comments_html = comment_soup.findAll("p", class_="sc-169yn8p-10 hYFULX")
     comments = [tag.get_text(strip=True) for tag in extracted_comments_html]

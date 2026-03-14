@@ -5,7 +5,6 @@ from src.common.utils.logger import get_logger
 from src.common.utils.text_utils import is_url
 
 
-
 def parse_article_list(html: str, parser_name: str) -> list[dict]:
     """
     トップページから記事一覧を抽出する。
@@ -33,7 +32,7 @@ def parse_article_simple_info(html: str, parser_name: str, logger) -> dict:
     -------
     dict
         {
-            
+
             "title": "記事タイトル",
             "num_comments":"コメント数"
             "comments":"コメントリスト"
@@ -44,15 +43,14 @@ def parse_article_simple_info(html: str, parser_name: str, logger) -> dict:
 
     module_path = f"src.common.scraping.parsers.sites.{parser_name}"
     module = importlib.import_module(module_path)
-    article_info = module.extract_simple_info_from_html(html,logger)
-
+    article_info = module.extract_simple_info_from_html(html, logger)
 
     return article_info
 
 
-
-
-def parse_article_detail_info(url: str,html: str, parser_name: str, settings:dict, drive_service) -> tuple[list[str], list[str]]:
+def parse_article_detail_info(
+    url: str, html: str, parser_name: str, settings: dict, drive_service
+) -> tuple[list[str], list[str]]:
     """
     指定URLの記事からスレッド本文と画像URLを抽出し、
     台本作成に必要な threads / pictures / media_urls を返す。
@@ -69,10 +67,11 @@ def parse_article_detail_info(url: str,html: str, parser_name: str, settings:dic
 
     module_path = f"src.common.scraping.parsers.sites.{parser_name}"
     module = importlib.import_module(module_path)
-    threads, pictures = module.extract_detail_info_from_html(url,html,settings,drive_service)
+    threads, pictures = module.extract_detail_info_from_html(
+        url, html, settings, drive_service
+    )
 
     return threads, pictures
-
 
 
 def extract_media_url(raw_threads: list[str]) -> list[str]:
@@ -83,7 +82,10 @@ def extract_media_url(raw_threads: list[str]) -> list[str]:
             media_urls.append(url_or_text)
     return media_urls
 
-def parse_comments(url: str, parser_name: str, source: dict, settings:dict) -> list[str]:
+
+def parse_comments(
+    url: str, parser_name: str, source: dict, settings: dict
+) -> list[str]:
     """
     指定URLの記事からコメント部分を抽出し返す。
 

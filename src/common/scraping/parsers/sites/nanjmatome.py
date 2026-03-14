@@ -2,7 +2,10 @@ from bs4 import BeautifulSoup
 import re
 from urllib.parse import urljoin
 
-from src.common.utils.list_utils import extract_only_long_gif_urls, process_raw_threads_from_long_gif_info
+from src.common.utils.list_utils import (
+    extract_only_long_gif_urls,
+    process_raw_threads_from_long_gif_info,
+)
 from src.common.utils.process_values import preprocess_raw_threads
 from src.common.scraping.html_parser import extract_media_url
 from common.pipeline.thread_builder import thread_builder
@@ -10,22 +13,21 @@ from src.common.media.save_thread_images import save_media_from_url
 from src.common.google_drive.drive_uploader import upload_multiple_files_to_drive
 
 
-def parse_articles_from_top_page(top_page_html: str)->list[dict]:
+def parse_articles_from_top_page(top_page_html: str) -> list[dict]:
     soup = BeautifulSoup(top_page_html, "lxml")
     article_urls = []
-    #urlのリストを作成
+    # urlのリストを作成
     for article_outer_element in soup.find_all("div", class_="article-outer hentry"):
 
-        url = article_outer_element.find("h2",class_ = "article-title entry-title").find("a")["href"]
+        url = article_outer_element.find("h2", class_="article-title entry-title").find(
+            "a"
+        )["href"]
         article_urls.append(url)
 
     return article_urls
 
 
-
-
-
-def extract_simple_info_from_html(html: str,logger) -> dict:
+def extract_simple_info_from_html(html: str, logger) -> dict:
     """
     HTML内からターゲットジャンルかを判断するための情報を抽出してdictで返す関数。
 
@@ -35,7 +37,7 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
     Returns:
     dict
         {
-            
+
             "title": 記事タイトル,
             "ArticleText": 本文テキスト
             "num_comments":コメント数
@@ -45,41 +47,48 @@ def extract_simple_info_from_html(html: str,logger) -> dict:
         }
     """
     soup = BeautifulSoup(html, "lxml")
-    article_info = []    
+    article_info = []
     comments = []
 
-    #[url,comments,title,Genre]のリストを作成
+    # [url,comments,title,Genre]のリストを作成
     for article_outer_element in soup.find_all("div", class_="article-outer hentry"):
 
-        num_comments_text = article_outer_element.find("li",class_ = "article-comment-count").get_text()
+        num_comments_text = article_outer_element.find(
+            "li", class_="article-comment-count"
+        ).get_text()
         # 正規表現で () 内を取得
         match = re.search(r"\((.*?)\)", num_comments_text)
 
         if match:
             num_comments = match.group(1)
 
-        title = article_outer_element.find("h2",class_ = "article-title entry-title").find("a").get_text()
+        title = (
+            article_outer_element.find("h2", class_="article-title entry-title")
+            .find("a")
+            .get_text()
+        )
 
-        genre = article_outer_element.find("dd",class_ = "article-category").get_text()
-        
+        genre = article_outer_element.find("dd", class_="article-category").get_text()
+
         comments_list = []
-        #コメントのリストを作成
-        for comment_b_element in soup.find("div", class_="article-body-inner").find_all("div",class_="t_b"):
+        # コメントのリストを作成
+        for comment_b_element in soup.find("div", class_="article-body-inner").find_all(
+            "div", class_="t_b"
+        ):
             comment = comment_b_element.get_text()
             comments_list.append(comment)
 
-
-    article_info={
+    article_info = {
         "title": title,
         "num_comments": num_comments,
         "comments": comments_list,
         "genre": genre,
-
     }
 
     return article_info
 
-def parse_thread_content(url: str, html: str)-> list[str]:
+
+def parse_thread_content(url: str, html: str) -> list[str]:
     """
     HTML からスレッド本文のテキストおよび有効な画像URLを抽出する関数。
 
@@ -118,10 +127,11 @@ def parse_thread_content(url: str, html: str)-> list[str]:
 
             # --- 1. span / b タグのテキスト抽出 ---
             class_list = tag.get("class")
-            
-            if class_list == None:continue
 
-            if "t_b" in class_list :
+            if class_list == None:
+                continue
+
+            if "t_b" in class_list:
                 if tag.find_parent("dt"):  # レス番号などは除外
                     continue
                 text = tag.get_text(strip=True)
@@ -136,7 +146,7 @@ def parse_thread_content(url: str, html: str)-> list[str]:
 
                     # jpg/gif で終わり、不要なURLは除外
                     if (
-                        re.search(r'\.(jpg|gif)(?:\?.*)?$', u, re.IGNORECASE)
+                        re.search(r"\.(jpg|gif)(?:\?.*)?$", u, re.IGNORECASE)
                         and "twitter" not in u
                         and "twimg" not in u
                     ):
@@ -144,8 +154,9 @@ def parse_thread_content(url: str, html: str)-> list[str]:
     return combined
 
 
-
-def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_service) -> tuple[list[str], list[str]]:
+def extract_detail_info_from_html(
+    url: str, html: str, settings: dict, drive_service
+) -> tuple[list[str], list[str]]:
     """
     指定URLの記事からスレッド本文と画像URLを抽出し、
     台本作成に必要な threads / pictures / media_urls を返す。
@@ -161,51 +172,51 @@ def extract_detail_info_from_html(url: str, html: str, settings: dict, drive_ser
             (threads, pictures)
     """
 
-
     # -------------------------------------------
     # 初期化
     # -------------------------------------------
-    threads = []          # スレッド本文（テキスト）
-    pictures =  []         # スレッドごとの画像ファイル名
-    media_urls = []       # 実際の画像URL
+    threads = []  # スレッド本文（テキスト）
+    pictures = []  # スレッドごとの画像ファイル名
+    media_urls = []  # 実際の画像URL
 
     # -------------------------------------------
     # BeautifulSoupで記事本文の要素を探索
     # -------------------------------------------
-    raw_threads = parse_thread_content(url,html)
+    raw_threads = parse_thread_content(url, html)
 
     # -------------------------------------------
     # 重複除去
     # -------------------------------------------
     raw_threads = preprocess_raw_threads(raw_threads)
-    
+
     # -------------------------------------------
     # スレッドにある全画像の保存
     # -------------------------------------------
     media_urls = extract_media_url(raw_threads)
     media_infos = []
     for media_url in media_urls:
-        #ローカルへの保存
-        media_info = save_media_from_url(media_url,settings)
+        # ローカルへの保存
+        media_info = save_media_from_url(media_url, settings)
         media_infos.append(media_info)
 
-
-    #Driveへの保存
-    uploaded_results = upload_multiple_files_to_drive(drive_service, media_infos, settings)
-    #TODO
-    #uploaded_resultsをもとに失敗したときの処理を書く
-
+    # Driveへの保存
+    uploaded_results = upload_multiple_files_to_drive(
+        drive_service, media_infos, settings
+    )
+    # TODO
+    # uploaded_resultsをもとに失敗したときの処理を書く
 
     # -------------------------------------------
     # GIFの長さ情報を使う場合（空文字挿入処理）GIFがない媒体でも処理可能→その場合何も起こらない
     # -------------------------------------------
 
-    #GIFの長さを確認してリストにまとめる
+    # GIFの長さを確認してリストにまとめる
     only_long_gif_urls = extract_only_long_gif_urls(media_url)
 
-    #GIF情報をもとに処理
-    raw_threads = process_raw_threads_from_long_gif_info(raw_threads,only_long_gif_urls)
-
+    # GIF情報をもとに処理
+    raw_threads = process_raw_threads_from_long_gif_info(
+        raw_threads, only_long_gif_urls
+    )
 
     # -------------------------------------------
     # テキストと画像を順に処理

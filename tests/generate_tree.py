@@ -1,5 +1,6 @@
 import os
 
+
 def generate_tree(path, prefix=""):
     entries = sorted(os.listdir(path))
     tree_str = ""

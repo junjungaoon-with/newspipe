@@ -1,8 +1,8 @@
 import os
 import shutil
 
-def clear_local_folder(save_dir_path:str):
 
+def clear_local_folder(save_dir_path: str):
     """指定フォルダ内のファイル・サブフォルダを全削除"""
     if not os.path.exists(save_dir_path):
         print(f"フォルダが存在しません: {save_dir_path}")

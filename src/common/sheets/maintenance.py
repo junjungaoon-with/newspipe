@@ -4,6 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 from src.common.sheets.client import get_sheet
 
+
 def delete_over_max_rows(settings: dict) -> None:
     """
     Google スプレッドシート内の指定シートにおいて、
@@ -27,7 +28,7 @@ def delete_over_max_rows(settings: dict) -> None:
     # 設定
     # -------------------------
     SHEET_NAME_LIST = settings["MAINTENANCE_SHEETS"]
-    MAX_DATA_ROWS = settings["MAX_ROWS"]   # データ部分だけの上限（ヘッダ除く）
+    MAX_DATA_ROWS = settings["MAX_ROWS"]  # データ部分だけの上限（ヘッダ除く）
 
     # -------------------------
     # 各シートのメンテナンス処理
@@ -40,20 +41,24 @@ def delete_over_max_rows(settings: dict) -> None:
             data_rows = total_rows - 1  # ヘッダ行を除く
 
             if data_rows > MAX_DATA_ROWS:
-                print(f"Sheet '{sheet_name}' has {data_rows} data rows, exceeding the limit of {MAX_DATA_ROWS}. Deleting all data rows.")
+                print(
+                    f"Sheet '{sheet_name}' has {data_rows} data rows, exceeding the limit of {MAX_DATA_ROWS}. Deleting all data rows."
+                )
 
                 # ヘッダ行を保持し、A1 に書き戻す
                 header = all_values[0]
-                sheet.update('A1', [header])
+                sheet.update("A1", [header])
 
                 # 余った行をクリア
                 if total_rows > 1:
-                    clear_range = f"A2:DA{total_rows}"  # Z列までクリア（必要に応じて調整）
+                    clear_range = (
+                        f"A2:DA{total_rows}"  # Z列までクリア（必要に応じて調整）
+                    )
                     sheet.batch_clear([clear_range])
 
                 print(f" {sheet_name}のデータ行をすべて削除しました。")
             else:
                 pass
-            
+
         except Exception as e:
             print(f"Error processing sheet '{sheet_name}': {e}")

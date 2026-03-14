@@ -3,9 +3,8 @@ from urllib.parse import urlparse
 import requests
 
 
-
-def save_media_from_url(media_url :str, settings: dict) -> dict[str]:
-    #TODO 機能ごとに分割する
+def save_media_from_url(media_url: str, settings: dict) -> dict[str]:
+    # TODO 機能ごとに分割する
     """
     画像・GIF をローカルの data/{channel_name}/faces/ フォルダに保存する関数。
 
@@ -45,7 +44,7 @@ def save_media_from_url(media_url :str, settings: dict) -> dict[str]:
     save_dir = os.path.join(project_root, "data", channel_name, "images")
     os.makedirs(save_dir, exist_ok=True)
 
-    file_name =  f"{file_id}{ext}"
+    file_name = f"{file_id}{ext}"
     save_path = os.path.join(save_dir, f"{file_id}{ext}")
 
     # --- ダウンロードして保存 ---
@@ -53,12 +52,8 @@ def save_media_from_url(media_url :str, settings: dict) -> dict[str]:
     if response.status_code == 200:
         with open(save_path, "wb") as f:
             f.write(response.content)
-        return {"filename":file_name,
-                "local_path":save_path}
+        return {"filename": file_name, "local_path": save_path}
 
     else:
         print("ダウンロード失敗:", response.status_code)
         return ""
-
-
-

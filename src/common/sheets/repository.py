@@ -14,27 +14,30 @@ def get_researched_urls(settings: dict) -> set:
     """
     走査済みURL (col1) をセットで返す。
     """
-    
-    sheet = get_sheet(settings["SHEET_SCANNED"],settings)
+
+    sheet = get_sheet(settings["SHEET_SCANNED"], settings)
     return set(filter(None, sheet.col_values(1)))
 
-def get_sheet_values( sheet_name: str, settings: dict) -> list[list]:
+
+def get_sheet_values(sheet_name: str, settings: dict) -> list[list]:
     """
     指定シートの全データを2次元リストで返す。
     """
-    sheet = get_sheet(sheet_name,settings)
+    sheet = get_sheet(sheet_name, settings)
     value = sheet.get_all_values()
     return value
+
 
 def append_researched_urls(urls: Union[str, List[str]], settings: dict) -> None:
     if not urls:
         return
-    
+
     if isinstance(urls, str):
         urls = [urls]
 
-    sheet = get_sheet(settings["SHEET_SCANNED"],settings)
+    sheet = get_sheet(settings["SHEET_SCANNED"], settings)
     sheet.append_rows([[u] for u in urls], value_input_option="RAW")
+
 
 def get_next_row(sheet):
     """シートの末尾（次に書き込む行番号）を返す。"""

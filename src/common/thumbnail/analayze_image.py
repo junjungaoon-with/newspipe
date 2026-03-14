@@ -1,9 +1,10 @@
 import cv2
-import os 
+import os
 from PIL import Image
 import numpy as np
 
 from src.common.media.read import safe_imread
+
 
 def compute_face_area_ratios(image_path: str, settings: dict) -> tuple[float, float]:
     """
@@ -16,7 +17,7 @@ def compute_face_area_ratios(image_path: str, settings: dict) -> tuple[float, fl
     scale_factor = settings["SCALE_FACTOR"]
     min_neighbors = settings["MIN_NEIGHBORS"]
     minSize = settings["MIN_SIZE"]
-    
+
     _face_cascade = cv2.CascadeClassifier(cascade_path)
 
     image_path = os.path.abspath(image_path)
@@ -44,7 +45,7 @@ def compute_face_area_ratios(image_path: str, settings: dict) -> tuple[float, fl
         return 0.0, 0.0
 
     areas = []
-    for (x, y, fw, fh) in faces:
+    for x, y, fw, fh in faces:
         x2, y2 = min(x + fw, w), min(y + fh, h)
         x1, y1 = max(x, 0), max(y, 0)
         cw, ch = max(0, x2 - x1), max(0, y2 - y1)
@@ -55,8 +56,7 @@ def compute_face_area_ratios(image_path: str, settings: dict) -> tuple[float, fl
     return min(1.0, sum_ratio), min(1.0, max_ratio)
 
 
-
-def is_within_aspect_ratio(image_path, target_ratio)-> bool:
+def is_within_aspect_ratio(image_path, target_ratio) -> bool:
 
     try:
         with Image.open(image_path) as img:
@@ -64,22 +64,24 @@ def is_within_aspect_ratio(image_path, target_ratio)-> bool:
     except Exception as e:
         print(f"Error loading image: {e}")
         return False  # 読み込めない場合は False にする
-    
+
     if height == 0:
         return False  # 安全対策
 
     ratio = width / height
     if ratio >= target_ratio:
         return True
-    else :
+    else:
         return False
-    
-def judge_face_fully_in_top_half(image_path: str,) -> str:
 
+
+def judge_face_fully_in_top_half(
+    image_path: str,
+) -> str:
 
     # ★ここを調整：Haar枠の下側（アゴ・首寄り）をどれだけ「顔扱い」するか
     FACE_BOTTOM_RATIO = 0.85  # 1.0だと厳密
-    
+
     pil_img = Image.open(image_path).convert("RGB")
     img = np.array(pil_img)
     H, W = img.shape[0], img.shape[1]
@@ -104,8 +106,7 @@ def judge_face_fully_in_top_half(image_path: str,) -> str:
         for x, y, fw, fh in faces:
             effective_bottom = int(round(y + fh * FACE_BOTTOM_RATIO))
             fully_inside_top = (
-                (x >= 0) and (y >= 0) and
-                (x + fw <= W) and (effective_bottom <= half_y)
+                (x >= 0) and (y >= 0) and (x + fw <= W) and (effective_bottom <= half_y)
             )
             if fully_inside_top:
                 status = True
