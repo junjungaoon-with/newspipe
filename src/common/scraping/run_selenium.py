@@ -8,7 +8,14 @@ from urllib.parse import quote
 def set_up_selenium():
     # Chromeドライバを起動（ヘッドレスモード推奨）
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
+    # ボットの兆候を隠す
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    # ユーザーエージェントを設定（実際のブラウザっぽく見せる）
+
+    # WebDriverのプロパティを削除
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option("useAutomationExtension", False)
     driver = webdriver.Chrome(options=options)
     return driver
 
@@ -17,13 +24,13 @@ def serch_picture_by_selenium(driver, query, settings):
     get_max_picture = settings["GET_MAX_PICTURE"]
 
     # Google画像検索ページを開く
-    driver.get(f"https://www.google.com/search?tbm=isch&q={query}")
+    driver.get(f"https://www.google.com/search?tbm=isch&q={query}&tbs=qdr:d,isz:l")
 
     # ページ読み込み待機
     sleep(2)
 
     # 画像を取得（imgタグを順に取得）
-    result_html = driver.find_element(By.ID, "rso")
+    result_html = driver.find_element(By.ID, "gevUs")
     images_html = result_html.find_elements(By.TAG_NAME, "img")
     images_html = images_html[:get_max_picture]
     images_url = [x.get_attribute("src") for x in images_html]

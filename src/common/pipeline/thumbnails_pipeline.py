@@ -52,13 +52,13 @@ def make_thumbnail(title, script_text, unique_id, settings, drive_service):
 
     if pattern == "single_wide":
         # TODO: どんな種類の写真が通るのか検証
-        is_complete, local_path = build_wide_thumbnail(first, settings)
+        is_complete, local_path = build_wide_thumbnail(first, settings, logger=logger)
         if is_complete:
             pattern = "single_wide"
 
     elif pattern == "double":
         is_complete, local_path = build_double_thumbnail(
-            first, second, unique_id, settings
+            first, second, unique_id, settings, logger=logger
         )
         if is_complete:
             pattern = "double"

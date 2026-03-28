@@ -14,8 +14,8 @@ from src.common.google_drive.drive_client import get_drive_service
 
 def main():
     channel_list = [
-        "martial_arts",
         "baseball",
+        "martial_arts",
         "IT",
         "soccer",
         # "volleyball",

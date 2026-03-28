@@ -87,7 +87,7 @@ def load_settings(channel_name: str) -> dict:
         # 2枚組サムネ
         "DOUBLE_THUMB_EXTRA_WORD": f"{extra_word} 顔写真",
         "DOUBLE_THUMB_TARGET_HIGHT": 540,
-        "GET_MAX_PICTURE": 20,
+        "GET_MAX_PICTURE": 40,
         # 顔検出器設定（Haar Cascade）
         "IS_HUMAN_ARTICLE": raw.get(
             "is_human_article", True
